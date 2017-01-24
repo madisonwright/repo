@@ -1,18 +1,32 @@
-#how to import without messing up the VM?
+#! /usr/bin/python3
 import psycopg2
 import sys
 import csv
 
-
-conn = psycopg2.connect(dbname=sys.argv[1],host=host='127.0.0.1',port=int(sys.argv[2]))
+print(sys.argv)
+conn = psycopg2.connect(dbname=sys.argv[1],host='127.0.0.1',port=int(sys.argv[2]))
 cur = conn.cursor()
 
 
 def make_products():
+	diction = dict()
 	with open('/home/osnapdev/repo/sql/osnap_legacy/product_list.csv','r') as csvfile:
 		spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-	    for row in spamreader:
-	    	productpk = row[0]
+		for row in spamreader:
+			first = row[0]
+			first_list = first.split(',')
+			
+			print(first_list[0])
+			if first_list[0] != 'name':
+				print(first_list[0])  #here the list is slilt at we see only the name column
+				cur.execute("INSERT INTO products (description) VALUES (%s)",(first_list[0],))
+				cur.execute("SELECT product_pk FROM products WHERE description=%s",(first_list[0],))
+				diction[first_list[0]] = cur.fetchone()[0]
+		print(diction)
+	return
+make_products()
+
+"""productpk = row[0]
 	    	vendr = row[5]
 	    	desc = row[3]
 	    	alt_desc = row[2]
@@ -66,3 +80,4 @@ def make_products():
 		#	roles[role] = cur.fetchone()[0]
 
 
+"""
