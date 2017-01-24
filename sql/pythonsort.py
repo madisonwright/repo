@@ -34,5 +34,3 @@ def make_products():
 #	conn.commit()
 #	cur.close()
 #	conn.clow()
-
-	make_products()
