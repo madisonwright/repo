@@ -6,10 +6,35 @@ import csv
 print(sys.argv)
 conn = psycopg2.connect(dbname=sys.argv[1],host='127.0.0.1',port=int(sys.argv[2]))
 cur = conn.cursor()
+diction = dict()
+
+
+def products():
+	with open('/home/osnapdev/repo/sql/osnap_legacy/product_list.csv','r') as csvfile:
+		reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+		data = []
+		whole = ''
+		count = 0
+		for row in reader:
+			if count > 0:
+				for i in row:
+					whole += i
+					whole += " "
+			count+=1
+		data = whole.split(',')
+		print(data, "*\n")
+		#data = data[5::]
+
+		#for line in data:
+			#description = line[0]
+			#print(description,'*')
+
+	return
+
+
 
 
 def make_products():
-	diction = dict()
 	with open('/home/osnapdev/repo/sql/osnap_legacy/product_list.csv','r') as csvfile:
 		spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
 		for row in spamreader:
@@ -23,9 +48,14 @@ def make_products():
 				cur.execute("SELECT product_pk FROM products WHERE description=%s",(first_list[0],))
 				diction[first_list[0]] = cur.fetchone()[0]
 		print(diction)
+	
 	return
-make_products()
 
+#make_products()
+#open_file('product_list')
+products()
+
+conn.commit()
 """productpk = row[0]
 	    	vendr = row[5]
 	    	desc = row[3]
