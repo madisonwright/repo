@@ -20,10 +20,13 @@ def products():
 				for i in row:
 					whole += i
 					whole += " "
+				new_row = whole.split(',')
+				data.append(new_row)
+				whole = ''
 			count+=1
-		data = whole.split(',')
-		print(data, "*\n")
-		#data = data[5::]
+			
+		for dat in data:
+			print(dat, "*\n")
 
 		#for line in data:
 			#description = line[0]
