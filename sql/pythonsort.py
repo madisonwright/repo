@@ -24,14 +24,14 @@ def products():
 				data.append(new_row)
 				whole = ''
 			count+=1
-			
+
 		for dat in data:
-			print(dat, "*\n")
-
-		#for line in data:
-			#description = line[0]
-			#print(description,'*')
-
+			#vendor, description, alt_description
+			cur.execute("INSERT INTO products (vendor, description, alt_description) VALUES (%s,%s,%s)",(dat[4],dat[2],dat[0]))
+			cur.execute("SELECT product_pk FROM products WHERE vendor=%s",(dat[4],))
+			diction[dat[4],dat[2],dat[0]] = cur.fetchone()[0]
+			
+		print(diction)
 	return
 
 
@@ -50,12 +50,10 @@ def make_products():
 				cur.execute("INSERT INTO products (description) VALUES (%s)",(first_list[0],))
 				cur.execute("SELECT product_pk FROM products WHERE description=%s",(first_list[0],))
 				diction[first_list[0]] = cur.fetchone()[0]
-		print(diction)
 	
 	return
 
 #make_products()
-#open_file('product_list')
 products()
 
 conn.commit()
