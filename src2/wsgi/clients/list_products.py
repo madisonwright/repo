@@ -12,16 +12,16 @@ from urllib.parse   import urlencode
 def main():
     # Check the CLI arguments
     if len(sys.argv)<3 :
-        print("Usage: python3 %s <url> <filter>"%sys.argv[0])
+        print("Usage: python3 %s <url> <username>"%sys.argv[0])
         return
     
     # Prep the arguments blob
     args = dict()
     args['timestamp'] = datetime.datetime.utcnow().isoformat()
-    args['filter']  = sys.argv[2]
+    args['username']  = sys.argv[2]
 
     # Print a message to let the user know what is being tried
-    print("Searching product list for: %s"%args['filter'])
+    print("Searching list for: %s"%args['username'])
 
     # Setup the data to send
     sargs = dict()
