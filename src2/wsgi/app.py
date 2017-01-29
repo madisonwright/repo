@@ -58,17 +58,6 @@ def logout():
 def rest():
     return render_template('rest.html')
 
-@app.route('/rest/lost_key', methods=('POST',))
-def lost_key():
-    if request.method=='POST' and 'arguments' in request.form:
-        req=json.loads(request.form['arguments'])
-    dat = dict()
-    dat['timestamp'] = req['timestamp']
-    dat['result'] = 'OK'
-    data = json.dumps(dat)
-    return data
-
-
 @app.route('/rest/activate_user', methods=('POST',))
 def activate_user():
     if request.method=='POST' and 'arguments' in request.form:
@@ -89,37 +78,7 @@ def suspend_user():
     data = json.dumps(dat)
     return data
 
-@app.route('/rest/list_products', methods=('POST',))
-def list_products():
-    if request.method=='POST' and 'arguments' in request.form:
-        req=json.loads(request.form['arguments'])
-    dat = dict()
-    dat['timestamp'] = req['timestamp']
-    dat['result'] = 'OK'
-    data = json.dumps(dat)
-    return data
 
-
-@app.route('/rest/add_products', methods=('POST'))
-def add_products():
-    if request.method=='POST' and 'arguments' in request.form:
-        req=json.loads(request.form['arguments'])
-    dat = dict()
-    dat['timestamp'] = req['timestamp']
-    dat['result'] = 'OK'
-    data = json.dumps(dat)
-    return data
-
-
-@app.route('/rest/add_assets', methods=('POST'))
-def add_assets():
-    if request.method=='POST' and 'arguments' in request.form:
-        req=json.loads(request.form['arguments'])
-    dat = dict()
-    dat['timestamp'] = req['timestamp']
-    dat['result'] = 'OK'
-    data = json.dumps(dat)
-    return data
 
 
 
