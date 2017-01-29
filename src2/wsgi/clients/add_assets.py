@@ -12,24 +12,20 @@ from urllib.parse   import urlencode
 def main():
     # Check the CLI arguments
     if len(sys.argv)<6 :
-        print("Usage: python3 %s <url> <vendor> <description> <alt_desc> <compartments>"%sys.argv[0])
+        print("Usage: python3 %s <url> <vendor> <description> <compartments> <facility>"%sys.argv[0])
         return
     
     # Prep the arguments blob
     args = dict()
     args['timestamp'] = datetime.datetime.utcnow().isoformat()
-    
-    prod = dict()
-    prod['vendor']  = sys.argv[2]
-    prod['description'] = sys.argv[3]
-    prod['alt_description'] = sys.argv[4]
-    prod['compartments'] = sys.argv[5]
-    prod_list = list()
-    prod_list.append(prod)
-    args['new_products'] = prod_list
+    args['vendor']  = sys.argv[2]
+    args['description'] = sys.argv[3]
+    args['compartments'] = sys.argv[4]
+    args['facility'] = sys.argv[5]
+
 
     # Print a message to let the user know what is being tried
-    print("Add an item: %s"%prod)
+    print("Adding asset matching:\n\tvendor: %s\n\tdesc: %s\n\tcompart: %s\n\tfacility: %s"%(args['vendor'],args['description'],args['compartments'],args['facility']))
 
     # Setup the data to send
     sargs = dict()
