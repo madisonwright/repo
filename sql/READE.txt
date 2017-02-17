@@ -1,8 +1,4 @@
 three files are included in sql along with READE.txt
 
-create_tables.sql creates a table for all the Data Models.  Each table contains slots for the required info.
+create_tables.sql creates a table for all the user login input.  I picked an open 16 limit character for both username and password as specified in step 3.  I allowed for numbers in the name, to not discriminate agains people who are 2nds or 3rds of the family name. (ie. William the 3rd)
 
-import_data.sh imports the data files with curl, unzips the file, and runs a python program
-
-pythonsort.py  is supposed to read the files that were just downloaded in sql/osnap_legacy, sort them, then put the data into the tables.
-               It tries to run python on the VM and fails, need to correct this.

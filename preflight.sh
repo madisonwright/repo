@@ -16,12 +16,7 @@ cd sql
 psql $1 -f create_tables.sql
 curl -O https://classes.cs.uoregon.edu//17W/cis322/files/osnap_legacy.tar.gz
 tar -xzf osnap_legacy.tar.gz
-bash ./import_data.sh $1 5432 #remove for 6
-rm -rf osnap_legacy osnap_legacy.tar.gz #remove for 6
 cd ..
 
 # Install the wsgi files
 cp -R src/* $HOME/wsgi
-# Need to install the crypo library as well
-cp util/osnap_crypto.py $HOME/wsgi #remove for 6
-
