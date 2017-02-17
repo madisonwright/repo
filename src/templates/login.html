@@ -3,9 +3,12 @@
 
 <html>
 	<body><h2>Login</h2>Please log in with your name
-		<form action="http://127.0.0.1:8080/dashboard">
-			<input type="text" name="mytext" />
+		<form action="http://127.0.0.1:8080/login" method="POST">
+		username:	<input type="text" name="mytext" />
+		password:	<input type= "text" name="pass" />
 			<input type="submit" value="Login" />
 		</form>
+		<form action="http://127.0.0.1:8080/create_user">
+	or create a new user account: <input type="submit" value="New User" />
 	</body>
 </html>

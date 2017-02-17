@@ -17,24 +17,43 @@ def index():
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method=='POST':
-        #usr_input = request.form('mytext')
-        #session["result"]=res
-        return render_template('user.html',)
+        name = request.form['mytext']
+        password = request.form['pass']
+
+
+
+        session["user"]=name
+        return render_template('dashboard.html',data=session.user)
+
     if request.method=='GET':
         return render_template('login.html')
 
     return render_template('index.html')
 
-@app.route('/create_user', methods=('POST',))
+@app.route('/create_user', methods=['POST','GET'])
 def create_user():
-    if request.method=='POST' and 'arguments' in request.form:
-        req=json.loads(request.form['arguments'])
-    dat = dict()
-    dat['timestamp'] = req['timestamp']
-    dat['result'] = 'OK'
-    data = json.dumps(dat)
-    return data
+    #if request.method=='POST' and 'arguments' in request.form:
+    #    req=json.loads(request.form['arguments'])
+    #dat = dict()
+    #dat['timestamp'] = req['timestamp']
+    #dat['result'] = 'OK'
+   # data = json.dumps(dat)
+   # return data
+    if request.method=='POST':
+        name = request.form['mytext']
+        password = request.form['pass']
 
-@app.route('/dashboard')
+
+
+        session["user"]=name
+        return render_template('dashboard.html',data=session.user)
+    if request.method=='GET':
+        return render_template('create_user.html')
+
+
+@app.route('/dashboard', methods=['POST','GET'])
 def dashboard():
     return render_template('dashboard.html',data=request.args.get('mytext'))
+
+
+
