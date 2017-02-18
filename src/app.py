@@ -16,14 +16,15 @@ def index():
 
 @app.route('/login', methods=['GET','POST'])
 def login():
-    if request.method=='POST':
+    if request.method=='POST' and 'arguments' in request.form:
+        session.mytext = "dd"
         name = request.form['mytext']
         password = request.form['pass']
+    
 
 
-
-        session["user"]=name
-        return render_template('dashboard.html',data=session.user)
+        session["mytext"]=name
+        return render_template('dashboard.html',data=name)
 
     if request.method=='GET':
         return render_template('login.html')
@@ -32,26 +33,19 @@ def login():
 
 @app.route('/create_user', methods=['POST','GET'])
 def create_user():
-    #if request.method=='POST' and 'arguments' in request.form:
-    #    req=json.loads(request.form['arguments'])
-    #dat = dict()
-    #dat['timestamp'] = req['timestamp']
-    #dat['result'] = 'OK'
-   # data = json.dumps(dat)
-   # return data
-    if request.method=='POST':
+    if request.method=='POST' and 'arguments' in request.form:
         name = request.form['mytext']
         password = request.form['pass']
 
 
 
-        session["user"]=name
-        return render_template('dashboard.html',data=session.user)
+        session["mytext"]=name
+        return render_template('dashboard.html',data=session.mytext)
     if request.method=='GET':
         return render_template('create_user.html')
 
 
-@app.route('/dashboard', methods=['POST','GET'])
+@app.route('/dashboard', methods=['GET'])
 def dashboard():
     return render_template('dashboard.html',data=request.args.get('mytext'))
 
