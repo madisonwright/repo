@@ -21,14 +21,20 @@ def login():
         password = request.form['pass']
         session['mytext']=name
         session['pass']=password
-
+        
         sql = "SELECT username FROM login_info WHERE username = %s;"
         cur.execute(sql,(name,))
         res = cur.fetchone()
         if res == None:
             return redirect('/not_a_user')
         else:
-            return redirect('/dashboard')
+            sql = "SELECT username FROM login_info WHERE username = %s AND password = %s"
+            cur.execute(sql,(name,password))
+            res = cur.fetchone()
+            if res == None:
+                return redirect('/not_a_user')
+            else:
+                return redirect('/dashboard')
 
 
     if request.method=='GET':
@@ -40,8 +46,15 @@ def create_user():
     if request.method=='POST' and 'mytext' in request.form:
         name = request.form['mytext']
         password = request.form['pass']
-        session['mytext']=name
-        session['pass']=password
+        if len(name) < 17:
+            if len(password) < 17:
+                session['mytext']=name
+                session['pass']=password
+            else:
+                return redirect('already_a_user')
+        else:
+            return redirect('already_a_user')
+
 
         sql = "SELECT username FROM login_info WHERE username = %s;"
         cur.execute(sql,(name,))
@@ -49,6 +62,7 @@ def create_user():
         if res == None:
             new = "INSERT INTO login_info (username, password) VALUES (%s,%s);"
             cur.execute(new,(name,password,))
+            conn.commit()
             return redirect('/dashboard')
         else:
             return redirect('/already_a_user')
@@ -68,6 +82,5 @@ def not_a_user():
 @app.route('/already_a_user')
 def already_a_user():
     return render_template('already_user.html', data=session['mytext'])
-
 
 
