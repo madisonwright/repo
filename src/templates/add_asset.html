@@ -1,0 +1,18 @@
+
+<html>
+	<body><h2>Add Asset</h2>Assets in database:
+		<p>{{data}}</p>
+		<p>Input the Asset information</p>
+		<form action="http://127.0.0.1:8080/add_asset" method="POST">
+		Asset name:	<input type="text" name="text" />
+		Description:	<input type="text" name="description" />
+		Location:	<input type="text" name="location" />
+			<input type="submit" value="Create Asset" />
+		<p>note: asset name has a max of 16 characters</p>
+		</form>
+		<form action="http://127.0.0.1:8080/dashboard">
+			<input type="submit" value="Dashboard" />	
+		</form>
+
+	</body>
+</html>

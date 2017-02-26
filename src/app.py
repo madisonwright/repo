@@ -77,6 +77,17 @@ def add_facility():
     if request.method=='POST' and 'text' in request.form:
         name = request.form['text']
         fcode = request.form['fcode']
+        if len(name) < 33:
+            if len(fcode) < 77:
+                session['text']=name
+                session['code']=fcode
+            else:
+                session['error'] = fcode
+                return redirect('already_a_facility')
+        else:
+            session['error'] = name
+            return redirect('already_a_facility')
+
         sql = "SELECT facility_fk FROM facilities where facility_fk = %s;"
         cur.execute(sql,(name,))
         res = cur.fetchone()
@@ -93,7 +104,7 @@ def add_facility():
                 session['error'] = fcode
                 return redirect('/already_a_facility')
         else:
-            session['error'] = name
+            session['error'] = res
             return redirect('/already_a_facility')
         return redirect('/login')
     if request.method=='GET':
@@ -102,6 +113,42 @@ def add_facility():
         res = cur.fetchall()
         session['facilities_list'] = res
         return render_template('add_facility.html',data=session['facilities_list'])
+
+@app.route('/add_asset', methods=['POST','GET'])
+def add_asset():
+    if request.method=='POST' and 'text' in request.form:
+        name = request.form['text']
+        description = request.form['description']
+        location =request.form['location']
+        if len(name) < 17:
+            session['text']=name
+            session['description']=description
+            session['location']=location
+        else:
+            session['error'] = name
+            return redirect('already_an_asset')
+        sql = "SELECT asset_tag FROM Assets where asset_tag = %s;"
+        cur.execute(sql,(name,))
+        res = cur.fetchone()
+        if res == None:
+            new = "INSERT INTO Assets (asset_tag,description,current_location) VALUES (%s,%s,%s);"
+            cur.execute(new,(name,description,location,))
+            conn.commit()
+            return redirect('/add_asset') 
+        else:
+            session['error'] = name
+            return redirect('/already_an_asset')
+
+
+        session['error'] = request.form['text']
+        return redirect('/already_an_asset')
+
+    if request.method=='GET':
+        sql = "SELECT asset_tag FROM Assets;"
+        cur.execute(sql)
+        res = cur.fetchall()
+        session['asset_list'] = res
+        return render_template('add_asset.html',data=session['asset_list'])
 
 
 
@@ -121,7 +168,9 @@ def already_a_user():
 def already_a_facility():
     return render_template('already_a_facility.html', data=session['error'])
 
-
+@app.route('/already_an_asset')
+def already_an_asset():
+    return render_template('already_an_asset.html', data=session['error'])
 
 
 
