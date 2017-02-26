@@ -46,10 +46,12 @@ def create_user():
     if request.method=='POST' and 'mytext' in request.form:
         name = request.form['mytext']
         password = request.form['pass']
+        role = request.form['role']
         if len(name) < 17:
             if len(password) < 17:
                 session['mytext']=name
                 session['pass']=password
+                session['role']=role
             else:
                 return redirect('already_a_user')
         else:
@@ -60,8 +62,8 @@ def create_user():
         cur.execute(sql,(name,))
         res = cur.fetchone()
         if res == None:
-            new = "INSERT INTO login_info (username, password) VALUES (%s,%s);"
-            cur.execute(new,(name,password,))
+            new = "INSERT INTO login_info (username, password, role) VALUES (%s,%s,%s);"
+            cur.execute(new,(name,password,role,))
             conn.commit()
             return redirect('/dashboard')
         else:
