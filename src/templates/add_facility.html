@@ -1,0 +1,17 @@
+
+<html>
+	<body><h2>Add Facility</h2>Facilities in database:
+		<p>{{data}}</p>
+		<p>Input the facility information</p>
+		<form action="http://127.0.0.1:8080/add_facility" method="POST">
+		Facility name:	<input type="text" name="text" />
+		fcode:		<input type="text" name="fcode" />
+			<input type="submit" value="Create Facility" />
+		<p>note: facility name has a max of 32 characters and fcode a max of 6</p>
+		</form>
+		<form action="http://127.0.0.1:8080/dashboard">
+			<input type="submit" value="Dashboard" />	
+		</form>
+
+	</body>
+</html>

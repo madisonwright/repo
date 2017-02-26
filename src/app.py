@@ -72,6 +72,38 @@ def create_user():
     if request.method=='GET':
         return render_template('create_user.html')
 
+@app.route('/add_facility', methods=['POST','GET'])
+def add_facility():
+    if request.method=='POST' and 'text' in request.form:
+        name = request.form['text']
+        fcode = request.form['fcode']
+        sql = "SELECT facility_fk FROM facilities where facility_fk = %s;"
+        cur.execute(sql,(name,))
+        res = cur.fetchone()
+        if res == None:
+            sql2 = "SELECT code FROM facilities where code = %s;"
+            cur.execute(sql2,(fcode,))
+            res2 = cur.fetchone()
+            if res2 == None:
+                new = "INSERT INTO facilities (facility_fk, code) VALUES (%s,%s);"
+                cur.execute(new,(name,fcode,))
+                conn.commit()
+                return redirect('/add_facility') 
+            else:
+                session['error'] = fcode
+                return redirect('/already_a_facility')
+        else:
+            session['error'] = name
+            return redirect('/already_a_facility')
+        return redirect('/login')
+    if request.method=='GET':
+        sql = "SELECT facility_fk FROM facilities;"
+        cur.execute(sql)
+        res = cur.fetchall()
+        session['facilities_list'] = res
+        return render_template('add_facility.html',data=session['facilities_list'])
+
+
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
@@ -84,5 +116,13 @@ def not_a_user():
 @app.route('/already_a_user')
 def already_a_user():
     return render_template('already_user.html', data=session['mytext'])
+
+@app.route('/already_a_facility')
+def already_a_facility():
+    return render_template('already_a_facility.html', data=session['error'])
+
+
+
+
 
 
