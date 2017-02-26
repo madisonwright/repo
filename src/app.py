@@ -138,11 +138,8 @@ def add_asset():
         else:
             session['error'] = name
             return redirect('/already_an_asset')
-
-
         session['error'] = request.form['text']
         return redirect('/already_an_asset')
-
     if request.method=='GET':
         sql = "SELECT asset_tag FROM Assets;"
         cur.execute(sql)
@@ -150,6 +147,35 @@ def add_asset():
         session['asset_list'] = res
         return render_template('add_asset.html',data=session['asset_list'])
 
+@app.route('/dispose_asset', methods=['GET','POST'])
+def dispose_asset():
+    sql = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
+    cur.execute(sql,(session['mytext'],))
+    res = cur.fetchone()
+    if res == None:
+        return redirect('/classified')
+    else:
+        if request.method=='POST' and 'text' in request.form:
+            name = request.form['text']
+            sql2 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s;"
+            cur.execute(sql2,(name,))
+            res2 = cur.fetchone()
+            if res2 == None:
+                return redirect('/not_an_asset')
+            else:
+                sql3 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s AND current_location = 3;"
+                cur.execute(sql3,(name,))
+                res3 = cur.fetchone()
+                if res3 == None:
+                    sql4 = "UPDATE Assets SET current_location = 3 WHERE asset_tag = %s"
+                    #sql5 = "UPDATE Assets SET date = %s WHERE asset_tag = %s"
+                    cur.execute(sql4,(name,))
+                    conn.commit()
+                    return redirect('/dashboard')
+                else:
+                    return redirect('/already_disposed')
+        if request.method=='GET':
+            return render_template('dispose_asset.html')
 
 
 @app.route('/dashboard', methods=['GET'])
@@ -159,6 +185,10 @@ def dashboard():
 @app.route('/not_a_user')
 def not_a_user():
     return render_template('not_a_user.html', data=session['mytext'])
+
+@app.route('/not_an_asset')
+def not_an_asset():
+    return render_template('not_an_asset.html',data=session['text'])
 
 @app.route('/already_a_user')
 def already_a_user():
@@ -172,6 +202,12 @@ def already_a_facility():
 def already_an_asset():
     return render_template('already_an_asset.html', data=session['error'])
 
+@app.route('/already_disposed')
+def already_disposed():
+    return render_template('already_disposed.html',data=session['text'])
 
+@app.route('/classified')
+def classified():
+    return render_template('classified.html', data=session['mytext'])
 
 
