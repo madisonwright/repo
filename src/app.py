@@ -207,6 +207,7 @@ def asset_report():
 
 
 
+
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
     session['report'] = ""
