@@ -1,19 +1,13 @@
-
-This is my README file.
-Why Src2? because I'm an idot. I did something weird to src, failed to correct it and abandoned ship.
-
+README.txt
 Wsgi:
   app.py -holds the routs for the stubs
   config.py, lost_config.json -same as last time, configurations files
 
 templates:
-  hole the templates html files for the urls
+  holds the template html files for the urls
 
 clients:
-  actiate/suspend_user -stubs for activating and suspending the user, 1 arg
-  list_products -lists if your argument is in a table.  since my tables are empt  y, my stub says that every query has no match
-  lits_products/assets -take 4 args and list them back in json format
+ just stull here
 
-
-my code this week is largely based on the sample code. As far as I can tell, that's what we're supposed to do, and it's easier than past weeks.  I also seem to believe that the preflight.sh is also no longer needed, since these are stubs and therefor do not connect to the database.
+I just didn't have it in me to comment much of my code.  Pluss if I clutter it up at all I won't be able to read it myself.
 
