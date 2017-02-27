@@ -6,7 +6,11 @@
 		<form action="http://127.0.0.1:8080/add_asset" method="POST">
 		Asset name:	<input type="text" name="text" />
 		Description:	<input type="text" name="description" />
-		Location:	<input type="text" name="location" />
+		Location: <select name="location">
+			{% for thing in session.fac_list %}
+			<option value="{{thing[0]}}">{{thing[0]}}</option>
+			{% endfor %}
+		</select>
 		Date(M-D-YYYY):		<input type="text" name="date" />
 			<input type="submit" value="Create Asset" />
 		<p>note: asset name has a max of 16 characters</p>
