@@ -17,7 +17,8 @@ code			varchar(6)
 );
 
 --Assets has a name, descriptin and current location(connected to a facility)
---There will be a facility called 'disposed' for now. extra table not needed
+--There will be a facility called 'disposed' for now and a date for it.  
+--extra table not needed yet
 CREATE TABLE Assets(
 asset_pk		serial primary key,
 asset_tag		varchar(16),
