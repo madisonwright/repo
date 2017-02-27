@@ -1,0 +1,19 @@
+
+<html>
+	<body><h2>Pending Requests</h2>
+		<p>{{data}}</p>
+		<form action="http://127.0.0.1:8080/approve_req" method="POST">
+		
+		Requests: <select name="status">
+			{% for thing in session.pending %}
+			<option value="{{thing[0]}}">{{thing[0]}}</option>
+			{% endfor %}
+		</select>
+		<input type="submit" name="accept" value="Accept" />
+		<input type="submit" name="deny" value="Deny" />
+		</form>
+		<form action="http://127.0.0.1:8080/dashboard">
+			<input type="submit" value="Dashboard" />	
+		</form>
+	</body>
+</html>

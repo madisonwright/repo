@@ -1,0 +1,23 @@
+
+<html>
+	<body><h2>Transfer Request</h2>Assets in database:
+		<p>{{data}}</p>
+		<form action="http://127.0.0.1:8080/transfer_req" method="POST">
+		Asset name:	<input type="text" name="text" />
+		Asset Location: <select name="location">
+			{% for thing in session.fac_list %}
+			<option value="{{thing[0]}}">{{thing[0]}}</option>
+			{% endfor %}
+		</select>
+		Assert Destination:	<select name="destination">
+			{% for thing in session.fac_list %}
+			<option value="{{thing[0]}}">{{thing[0]}}</option>
+			{% endfor %}
+		</select>
+			<input type="submit" value="Submit Request" />
+		</form>
+		<form action="http://127.0.0.1:8080/dashboard">
+			<input type="submit" value="Dashboard" />	
+		</form>
+	</body>
+</html>

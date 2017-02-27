@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect
 from config import dbname, dbhost, dbport
 import json
 import psycopg2
+from jinja2 import Template
 
 app = Flask(__name__)
 app.secret_key="hello"
@@ -34,12 +35,18 @@ def login():
             if res == None:
                 return redirect('/not_a_user')
             else:
-                return redirect('/dashboard')
-
-
+                sql2 = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
+                cur.execute(sql2,(session['mytext'],))
+                res2 = cur.fetchone()
+                if res2 == None:
+                    session['my_role'] = "Facility Officer"
+                    return redirect('/dashboard')
+                else:
+                    session['my_role'] = "Logistics Officer"
+                    return redirect('/dashboard')
     if request.method=='GET':
         return render_template('login.html')
-
+#####################################################
 
 @app.route('/create_user', methods=['POST','GET'])
 def create_user():
@@ -63,12 +70,22 @@ def create_user():
             new = "INSERT INTO login_info (username, password, role) VALUES (%s,%s,%s);"
             cur.execute(new,(name,password,role,))
             conn.commit()
-            return redirect('/dashboard')
+            
+            sql2 = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
+            cur.execute(sql2,(session['mytext'],))
+            res2 = cur.fetchone()
+            if res2 == None:
+                session['my_role'] = "Facility Officer"
+                return redirect('/dashboard')
+            else:
+                session['my_role'] = "Logistics Officer"
+                return redirect('/dashboard')
         else:
             return redirect('/already_a_user')
 
     if request.method=='GET':
         return render_template('create_user.html')
+##########################################################3
 
 @app.route('/add_facility', methods=['POST','GET'])
 def add_facility():
@@ -111,6 +128,7 @@ def add_facility():
         res = cur.fetchall()
         session['facilities_list'] = res
         return render_template('add_facility.html',data=session['facilities_list'])
+##############################################################
 
 @app.route('/add_asset', methods=['POST','GET'])
 def add_asset():
@@ -148,14 +166,16 @@ def add_asset():
         cur.execute(sql)
         res = cur.fetchall()
         session['asset_list'] = res
+        sql2 = "SELECT facility_fk FROM facilities;"
+        cur.execute(sql2)
+        res2 = cur.fetchall()
+        session['fac_list'] = res2
         return render_template('add_asset.html',data=session['asset_list'])
+##############################################################
 
 @app.route('/dispose_asset', methods=['GET','POST'])
 def dispose_asset():
-    sql = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
-    cur.execute(sql,(session['mytext'],))
-    res = cur.fetchone()
-    if res == None:
+    if session['my_role'] == "Facility Officer":
         return redirect('/classified')
     else:
         if request.method=='POST' and 'text' in request.form:
@@ -182,6 +202,7 @@ def dispose_asset():
                     return redirect('/already_disposed')
         if request.method=='GET':
             return render_template('dispose_asset.html')
+#########################################################
 
 @app.route('/asset_report', methods=['POST','GET'])
 def asset_report():
@@ -203,6 +224,19 @@ def asset_report():
             return redirect('/asset_report')
     if request.method=='GET':
             return render_template('asset_report.html',data=session['report'])
+#############################################
+
+@app.route('/transfer_req')
+def transfer_req():
+    return render_template('transfer_req.html')
+
+@app.route('/approve_req')
+def approve_req():
+    return render_template('approve.html')
+
+@app.route('/update_transit')
+def update_transit():
+    return render_template('update_transit.html')
 
 
 
@@ -211,7 +245,10 @@ def asset_report():
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
     session['report'] = ""
-    return render_template('dashboard.html',data=session['mytext'])
+    if session['my_role'] == "Facility Officer":
+        return render_template('fac_dashboard.html',data=session['mytext'])
+    else:
+        return render_template('dashboard.html',data=session['mytext'])
 
 @app.route('/not_a_user')
 def not_a_user():
@@ -240,6 +277,14 @@ def already_disposed():
 @app.route('/classified')
 def classified():
     return render_template('classified.html', data=session['mytext'])
+
+@app.route('/invalid_request')
+def invalid_request():
+    return render_template('invalid_req.html',data=session['error'])
+
+@app.route('/no_requests')
+def no_requests():
+    return render_template('no_req.html')
 
 @app.route('/logout')
 def logout():
