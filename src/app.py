@@ -56,8 +56,6 @@ def create_user():
                 return redirect('already_a_user')
         else:
             return redirect('already_a_user')
-
-
         sql = "SELECT username FROM login_info WHERE username = %s;"
         cur.execute(sql,(name,))
         res = cur.fetchone()
@@ -120,10 +118,12 @@ def add_asset():
         name = request.form['text']
         description = request.form['description']
         location =request.form['location']
+        date = request.form['date']
         if len(name) < 17:
             session['text']=name
             session['description']=description
             session['location']=location
+            session['date'] = date
         else:
             session['error'] = name
             return redirect('already_an_asset')
@@ -131,8 +131,11 @@ def add_asset():
         cur.execute(sql,(name,))
         res = cur.fetchone()
         if res == None:
-            new = "INSERT INTO Assets (asset_tag,description,current_location) VALUES (%s,%s,%s);"
-            cur.execute(new,(name,description,location,))
+            sql2 = "SELECT facility_pk FROM facilities WHERE facility_fk = %s"
+            cur.execute(sql2,(location,))
+            facility_fk = cur.fetchone()
+            new = "INSERT INTO Assets (asset_tag,description,current_location,arrived) VALUES (%s,%s,%s,%s);"
+            cur.execute(new,(name,description,facility_fk,date))
             conn.commit()
             return redirect('/add_asset') 
         else:
@@ -157,6 +160,7 @@ def dispose_asset():
     else:
         if request.method=='POST' and 'text' in request.form:
             name = request.form['text']
+            date = request.form['date']
             sql2 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s;"
             cur.execute(sql2,(name,))
             res2 = cur.fetchone()
@@ -168,8 +172,10 @@ def dispose_asset():
                 res3 = cur.fetchone()
                 if res3 == None:
                     sql4 = "UPDATE Assets SET current_location = 3 WHERE asset_tag = %s"
-                    #sql5 = "UPDATE Assets SET date = %s WHERE asset_tag = %s"
+                    sql5 = "UPDATE Assets SET disposal_date = %s WHERE asset_tag = %s"
                     cur.execute(sql4,(name,))
+                    conn.commit()
+                    cur.execute(sql5,(date,name))
                     conn.commit()
                     return redirect('/dashboard')
                 else:
@@ -177,9 +183,33 @@ def dispose_asset():
         if request.method=='GET':
             return render_template('dispose_asset.html')
 
+@app.route('/asset_report', methods=['POST','GET'])
+def asset_report():
+    if request.method=='POST' and 'text' in request.form:
+        facility = request.form['text']
+        date = request.form['date']
+        if len(facility) < 1:
+            sql = "SELECT asset_tag, description, current_location, arrived, disposal_date FROM Assets WHERE arrived = %s"
+            cur.execute(sql,(date,))
+            session['report'] = cur.fetchall()
+            return redirect('/asset_report')
+        else:
+            find_fac = "SELECT facility_pk FROM facilities WHERE facility_fk = %s"
+            cur.execute(find_fac,(facility,))
+            fac = cur.fetchone()
+            sql2 = "SELECT asset_tag, description, current_location, arrived, disposal_date FROM Assets where current_location = %s AND arrived = %s"
+            cur.execute(sql2,(fac,date))
+            session['report'] = cur.fetchall()
+            return redirect('/asset_report')
+    if request.method=='GET':
+            return render_template('asset_report.html',data=session['report'])
+
+
+
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
+    session['report'] = ""
     return render_template('dashboard.html',data=session['mytext'])
 
 @app.route('/not_a_user')
@@ -210,4 +240,7 @@ def already_disposed():
 def classified():
     return render_template('classified.html', data=session['mytext'])
 
-
+@app.route('/logout')
+def logout():
+    session['mytext']= ""
+    return redirect('/login')

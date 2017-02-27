@@ -1,0 +1,17 @@
+
+<html>
+	<body><h2>Asset Report</h2>Select a facility and date
+		<form action="http://127.0.0.1:8080/asset_report" method="POST">
+		facility:	<input type="text" name="text" />
+		date(M-D-YYYY):		<input type="text" name="date" />
+			<input type="submit" value="Create Report" />
+		<p>note: Date must be specified, but facility may be left blank</p>
+		</form>
+		<form action="http://127.0.0.1:8080/dashboard">
+			<input type="submit" value="Dashboard" />
+		</form>	
+		<p>Asset Report</p>
+		<p>Asset Tag, Description, Facility, Arrival Date, Disposal Date</p>
+		<p>{{data}}</p>
+	</body>
+</html>
