@@ -27,3 +27,26 @@ current_location	integer REFERENCES facilities (facility_pk),
 arrived			text,
 disposal_date		text
 );
+
+
+Create TABLE request(
+request_pk		serial primary key,
+log_officer		integer REFERENCES Login_info (login_pk),
+fac_officer		integer REFERENCES Login_info (login_pk),
+submit_date		text,
+submit_time		timestamp,
+approved_date		text,
+approved_time		timestamp,
+load_time		text,
+unload_time		text,
+destination		integer REFERENCES facilities (facility_pk),
+asset			integer REFERENCES Assets (asset_pk)
+);
+
+Create TABLE History(
+asset			integer REFERENCES Assets (asset_pk),
+current_location	integer REFERENCES Assets (current_location),
+load_time		text REFERENCES Assets (load_time),
+destination		integer REFERENCES facilities (facility_pk),
+unload_time		text REFERENCES Assets (unload_time)
+);
