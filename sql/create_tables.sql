@@ -45,8 +45,9 @@ asset			integer REFERENCES Assets (asset_pk)
 
 Create TABLE History(
 asset			integer REFERENCES Assets (asset_pk),
-current_location	integer REFERENCES Assets (current_location),
-load_time		text REFERENCES Assets (load_time),
+current_location	integer REFERENCES facilities (facility_pk),
+load_time		text,
 destination		integer REFERENCES facilities (facility_pk),
-unload_time		text REFERENCES Assets (unload_time)
+unload_time		text
 );
+
