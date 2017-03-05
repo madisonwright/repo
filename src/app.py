@@ -233,8 +233,8 @@ def transfer_req():
     if request.method=="POST" and "destination" in request.form:
         dest = request.form['destination']
         asset_fac = request.form['asset_fac']
-        asset = asset_fac[0]
-
+        session['bug'] = asset_fac.split(',')[0][1::].strip("'")
+        asset=session['bug']
         sql = "SELECT asset_pk FROM Assets WHERE asset_tag = %s;"
         cur.execute(sql,(asset,))
         asset_pk = cur.fetchone()
@@ -248,12 +248,11 @@ def transfer_req():
         dat = datetime.date.today()
         date = str(dat.month)+'-'+str(dat.day)+'-'+str(dat.year)
         time = str(datetime.datetime.now().time())
-        
-        sql3 = "INSERT INTO request (log_officer,submit_date,submit_time,destination,asset) VALUES (%s,%s,%s,%s,%s);"
-        cur.execute(sql3,(log_officer,date,time,destination,asset_pk))
-        conn.commit()
-        
-        return redirect('dashboard')
+        boole = False
+        sql3 = "INSERT INTO request (log_officer,submit_date,submit_time,destination,asset,approved) VALUES (%s,%s,%s,%s,%s,%s);"
+        cur.execute(sql3,(log_officer,date,time,destination,asset_pk,boole))
+        conn.commit()        
+        return redirect('/request_made')
 
     if request.method=="GET":
         if session['my_role'] == "Facility Officer":
@@ -263,14 +262,90 @@ def transfer_req():
             cur.execute(sql2)
             session['asset_fac_list'] = cur.fetchall()
             return render_template('transfer_req.html',data=session['asset_list'])
-
-@app.route('/approve_req')
+#####################################################
+@app.route('/approve_req', methods=['GET','POST'])
 def approve_req():
-    return render_template('approve.html')
+    if request.method=="POST" and "accept" in request.form:
+        request_num = request.form['request'] 
+        dat = datetime.date.today()
+        date = str(dat.month)+'-'+str(dat.day)+'-'+str(dat.year)
+        time = str(datetime.datetime.now().time())
+        boole = True;
+        sql11= "UPDATE request SET (approved_date,approved_time,approved) = (%s,%s,%s) WHERE request_pk = %s;"
+        cur.execute(sql11,(date,time,boole,request_num))
+
+
+        return redirect('dashboard')
+
+    if request.method=="POST" and "deny" in request.form:
+        request_num = request.form['request']
+        sql10 = "DELETE FROM request WHERE request_pk = %s;"
+        cur.execute(sql10,(request_num,))
+        conn.commit()
+        return redirect('dashboard')
+
+
+
+    if request.method=="GET":
+        if session['my_role'] == "Logistics Officer":
+            return redirect('/classified')
+        else:
+            sql = "SELECT request_pk FROM request;"
+            cur.execute(sql)
+            res = cur.fetchone()
+            if res == None:
+                return redirect('/no_requests')
+            else:
+                asset_list = []
+                current_loc_list = []
+                destination_list = []
+                request_num_list = []
+
+                sql9 = "SELECT request_pk FROM request WHERE approved = 'f';"
+                cur.execute(sql9)
+                requests = cur.fetchall()
+                for item2 in requests:
+                    request_num_list.append(item2)
+                
+                sql3 = "SELECT asset FROM request WHERE approved = 'f';"
+                cur.execute(sql3)
+                assets = cur.fetchall()
+                for item in assets:
+                    sql6 = "SELECT asset_tag FROM Assets WHERE asset_pk = %s;"
+                    cur.execute(sql6,(item,))
+                    asset_list.append(cur.fetchone())
+                    
+                    sql7 = "SELECT facility_fk FROM facilities,Assets WHERE asset_pk = %s;"
+                    cur.execute(sql7,(item,))
+                    current_loc_list.append(cur.fetchone())
+
+                sql4 = "SELECT destination from request WHERE approved = 'f';"
+                cur.execute(sql4)
+                destinations = cur.fetchall()
+                for item3 in destinations:
+                    sql8 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s;"
+                    cur.execute(sql8,(item3,))
+                    destination_list.append(cur.fetchone())
+
+                request_list = []
+                reques = ''
+                for i in range(len(asset_list)):
+                    reques = "request number: " + str(request_num_list[i]) + "    " + str(asset_list[i]) + " at location: " + str(current_loc_list[i]) + " requested to be moved to: " + str(destination_list[i])
+                    request_list.append(reques)
+                session['request_list'] = request_num_list
+                return render_template('approve.html',data=request_list)
+
+
 
 @app.route('/update_transit')
 def update_transit():
-    return render_template('update_transit.html')
+    if request.method=="POST" and "destination" in request.form:
+        return redirect('dashboard')
+    if request.method=="GET":
+        if session['my_role'] == "Facility Officer":
+            return redirect('/classified')
+        else:
+            return render_template('update_transit.html')
 
 
 
@@ -310,11 +385,11 @@ def already_disposed():
 
 @app.route('/classified')
 def classified():
-    return render_template('classified.html', data=session['mytext'])
+    return render_template('classified.html', data=session['mytext'],data2=session['my_role'])
 
-@app.route('/invalid_request')
-def invalid_request():
-    return render_template('invalid_req.html',data=session['error'])
+@app.route('/request_made')
+def request_made():
+    return render_template('request_made.html')
 
 @app.route('/no_requests')
 def no_requests():

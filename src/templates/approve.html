@@ -4,8 +4,8 @@
 		<p>{{data}}</p>
 		<form action="http://127.0.0.1:8080/approve_req" method="POST">
 		
-		Requests: <select name="status">
-			{% for thing in session.pending %}
+		Requests: <select name="request">
+			{% for thing in session.request_list %}
 			<option value="{{thing[0]}}">{{thing[0]}}</option>
 			{% endfor %}
 		</select>
