@@ -3,6 +3,8 @@ from config import dbname, dbhost, dbport
 import json
 import psycopg2
 from jinja2 import Template
+import datetime
+import time
 
 app = Flask(__name__)
 app.secret_key="hello"
@@ -226,9 +228,41 @@ def asset_report():
             return render_template('asset_report.html',data=session['report'])
 #############################################
 
-@app.route('/transfer_req')
+@app.route('/transfer_req',methods=['POST','GET'])
 def transfer_req():
-    return render_template('transfer_req.html')
+    if request.method=="POST" and "destination" in request.form:
+        dest = request.form['destination']
+        asset_fac = request.form['asset_fac']
+        asset = asset_fac[0]
+
+        sql = "SELECT asset_pk FROM Assets WHERE asset_tag = %s;"
+        cur.execute(sql,(asset,))
+        asset_pk = cur.fetchone()
+        sql4 = "SELECT login_pk FROM Login_info WHERE username = %s;"
+        name = session['mytext']
+        cur.execute(sql4,(name,))
+        log_officer = cur.fetchone()
+        sql5 = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+        cur.execute(sql5,(dest,))
+        destination = cur.fetchone()
+        dat = datetime.date.today()
+        date = str(dat.month)+'-'+str(dat.day)+'-'+str(dat.year)
+        time = str(datetime.datetime.now().time())
+        
+        sql3 = "INSERT INTO request (log_officer,submit_date,submit_time,destination,asset) VALUES (%s,%s,%s,%s,%s);"
+        cur.execute(sql3,(log_officer,date,time,destination,asset_pk))
+        conn.commit()
+        
+        return redirect('dashboard')
+
+    if request.method=="GET":
+        if session['my_role'] == "Facility Officer":
+            return redirect('/classified')
+        else:
+            sql2 = "SELECT asset_tag,facility_fk FROM Assets,facilities WHERE current_location=facility_pk;"
+            cur.execute(sql2)
+            session['asset_fac_list'] = cur.fetchall()
+            return render_template('transfer_req.html',data=session['asset_list'])
 
 @app.route('/approve_req')
 def approve_req():
@@ -246,7 +280,7 @@ def update_transit():
 def dashboard():
     session['report'] = ""
     if session['my_role'] == "Facility Officer":
-        return render_template('fac_dashboard.html',data=session['mytext'])
+        return render_template('dashboard_fac.html',data=session['mytext'])
     else:
         return render_template('dashboard.html',data=session['mytext'])
 
