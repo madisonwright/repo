@@ -3,9 +3,9 @@
 	<body><h2>Update Request</h2>Approved requests:
 		<p>{{data}}</p>
 		<form action="http://127.0.0.1:8080/update_transit" method="POST">
-		Request: <select name="request">
-			{% for thing in session.request_list %}
-			<option value="{{thing[0]}}">{{thing[0]}}</option>
+		Request: <select name="request_num">
+			{% for thing in session.approved_req_num %}
+			<option value="{{thing}}">{{thing}}</option>
 			{% endfor %}
 		</select>
 		Load time:	<input type="text" name="load" />

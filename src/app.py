@@ -271,9 +271,12 @@ def approve_req():
         date = str(dat.month)+'-'+str(dat.day)+'-'+str(dat.year)
         time = str(datetime.datetime.now().time())
         boole = True;
-        sql11= "UPDATE request SET (approved_date,approved_time,approved) = (%s,%s,%s) WHERE request_pk = %s;"
-        cur.execute(sql11,(date,time,boole,request_num))
-
+        sql14 = "SELECT login_pk FROM Login_info WHERE username = %s"
+        cur.execute(sql14,(session['mytext'],))
+        name = cur.fetchone()
+        sql11= "UPDATE request SET (approved_date,approved_time,approved,fac_officer) = (%s,%s,%s,%s) WHERE request_pk = %s;"
+        cur.execute(sql11,(date,time,boole,name,request_num))
+        conn.commit()
 
         return redirect('dashboard')
 
@@ -284,13 +287,11 @@ def approve_req():
         conn.commit()
         return redirect('dashboard')
 
-
-
     if request.method=="GET":
         if session['my_role'] == "Logistics Officer":
             return redirect('/classified')
         else:
-            sql = "SELECT request_pk FROM request;"
+            sql = "SELECT * FROM request;"
             cur.execute(sql)
             res = cur.fetchone()
             if res == None:
@@ -315,8 +316,11 @@ def approve_req():
                     cur.execute(sql6,(item,))
                     asset_list.append(cur.fetchone())
                     
-                    sql7 = "SELECT facility_fk FROM facilities,Assets WHERE asset_pk = %s;"
+                    sql7 = "SELECT current_location FROM Assets WHERE asset_pk = %s;"
                     cur.execute(sql7,(item,))
+                    fac = cur.fetchone()
+                    sql13 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s;"
+                    cur.execute(sql13,(fac,))
                     current_loc_list.append(cur.fetchone())
 
                 sql4 = "SELECT destination from request WHERE approved = 'f';"
@@ -334,18 +338,49 @@ def approve_req():
                     request_list.append(reques)
                 session['request_list'] = request_num_list
                 return render_template('approve.html',data=request_list)
+#######################################################
 
-
-
-@app.route('/update_transit')
+@app.route('/update_transit',methods=['GET','POST'])
 def update_transit():
-    if request.method=="POST" and "destination" in request.form:
+    if request.method=="POST" and "request_num" in request.form:
+        num = request.form['request_num']
+        load = request.form['load']
+        unload = request.form['unload']
+        sql4 = "UPDATE request SET (load_time,unload_time) = (%s,%s) WHERE request_pk = %s;"
+        cur.execute(sql4,(load,unload,num,))
+        conn.commit()
         return redirect('dashboard')
+
     if request.method=="GET":
         if session['my_role'] == "Facility Officer":
             return redirect('/classified')
         else:
-            return render_template('update_transit.html')
+            approved_req_list = []
+            approved_req_num = []
+            sql = "SELECT * FROM request WHERE approved = 't' AND load_time IS NULL;"
+            cur.execute(sql)
+            approved = cur.fetchall()
+            if len(approved) < 1:
+                return redirect('/no_requests')
+            for item in approved:
+                asset = item[10]
+                destination = item[9]
+                req_num = item[0]
+                sql2 = "SELECT asset_tag FROM Assets WHERE asset_pk = %s"
+                sql3 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s"
+                cur.execute(sql2,(asset,))
+                asset_name = cur.fetchone()
+                cur.execute(sql3,(destination,))
+                dest = cur.fetchone()
+                approved_req = "Request number: " + str(req_num) + "  Asset: " + str(asset_name) + " approved to travel to destination: " + str(dest)
+                approved_req_list.append(approved_req)
+                approved_req_num.append(item[0])
+            session['approved_req_list'] = approved_req_list
+            session['approved_req_num'] = approved_req_num
+            
+
+
+            return render_template('update_transit.html',data=session['approved_req_list'])
 
 
 
@@ -393,7 +428,7 @@ def request_made():
 
 @app.route('/no_requests')
 def no_requests():
-    return render_template('no_req.html')
+    return render_template('no_requests.html')
 
 @app.route('/logout')
 def logout():

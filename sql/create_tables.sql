@@ -40,7 +40,8 @@ approved_time		text,
 load_time		text,
 unload_time		text,
 destination		integer REFERENCES facilities (facility_pk),
-asset			integer REFERENCES Assets (asset_pk)
+asset			integer REFERENCES Assets (asset_pk),
+approved		boolean
 );
 
 Create TABLE History(
