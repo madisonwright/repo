@@ -5,4 +5,5 @@ if [ "$#" -ne 1 ]; then
     exit;
 fi
 
-i
+chmod a+x import_data.py
+./import_data.py $1 $2
