@@ -16,7 +16,8 @@ cur = conn.cursor()
 
 @app.route('/')
 def index():
-    return render_template('index.html',dbname=dbname, dbhost=dbhost,dbport=dbport)
+    return redirect('/login')
+    #return render_template('index.html',dbname=dbname, dbhost=dbhost,dbport=dbport)
 
 @app.route('/login', methods=['GET','POST'])
 def login():
@@ -201,28 +202,33 @@ def dispose_asset():
             if res2 == None:
                 return redirect('/not_an_asset')
             else:
-                sql3 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s AND current_location = 3;"
-                cur.execute(sql3,(name,))
+                
+               # sqlx = "INSERT INTO facilities (facility_fk,fcode) VALUES (%s,%s);"
+                #dis = "Disposed"
+                #code = 666666
+                sqlz = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+                nam = 'Disposed'
+                cur.execute(sqlz,(nam,))
+                session['disposed'] = cur.fetchone()
+
+                sql3 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s AND current_location = %s;"
+                cur.execute(sql3,(name,session['disposed'],))
                 res3 = cur.fetchone()
 
-                sqlx = "INSERT INTO facilities (facility_fk,fcode) VALUES (%s,%s);"
-                dis = "Disposed"
-                code = 666666
-                sqlz = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
-                cur.execute(sqlz,(dis,))
-                session['disposed'] = cur.fetchone()
-                if session['disposed'] == None:
-                    cur.execute(sqlx,(dis,code))
-                    conn.commit()
 
-                sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
-                cur.execute(sqly,(dis,))
-                disp_pk = cur.fetchone()
+
+                #if session['disposed'] == None:
+                   # cur.execute(sqlx,(dis,code))
+                 #   conn.commit()
+
+                #sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+               # cur.execute(sqly,(nam,))
+               # disp_pk = cur.fetchone()
 
                 if res3 == None:
                     sql4 = "UPDATE Assets SET current_location = %s WHERE asset_tag = %s"
                     sql5 = "UPDATE Assets SET disposal_date = %s WHERE asset_tag = %s"
-                    cur.execute(sql4,(disp_pk,name,))
+                    cur.execute(sql4,(session['disposed'],name,))
                     conn.commit()
                     cur.execute(sql5,(date,name))
                     conn.commit()
@@ -417,9 +423,20 @@ def update_transit():
 def dashboard():
     session['report'] = ""
     if session['my_role'] == "Facility Officer":
-        return render_template('dashboard_fac.html',data=session['mytext'])
+        sql = "SELECT request_pk FROM request WHERE approved = %s;"
+        boole = False
+        cur.execute(sql,(boole,))
+        res = cur.fetchall()
+        length = len(res)
+        session['requests'] = length
+        return render_template('dashboard_fac.html',data=session['mytext'],data2=session['requests'])
     else:
-        return render_template('dashboard.html',data=session['mytext'])
+        sql2 = "SELECT request_pk FROM request WHERE approved = 't' AND load_time IS NULL;"
+        cur.execute(sql2)
+        res2 = cur.fetchall()
+        length2 = len(res2)
+        session['req_updates'] = length2
+        return render_template('dashboard.html',data=session['mytext'],data2=session['req_updates'])
 
 @app.route('/not_a_user')
 def not_a_user():
