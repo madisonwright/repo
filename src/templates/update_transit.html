@@ -8,8 +8,9 @@
 			<option value="{{thing}}">{{thing}}</option>
 			{% endfor %}
 		</select>
-		Load time:	<input type="text" name="load" />
-		Unload time:	<input type="text" name="unload" />
+		<p>input times in ISO format (mm-dd-yyyy)</p>
+		Load date:	<input type="text" name="load" />
+		Unload date:	<input type="text" name="unload" />
 			<input type="submit" value="Update Request" />
 		</form>
 		<form action="http://127.0.0.1:8080/dashboard">

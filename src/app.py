@@ -13,6 +13,7 @@ conn = psycopg2.connect(dbname=dbname,host=dbhost,port=dbport)
 cur = conn.cursor()
 
 
+
 @app.route('/')
 def index():
     return render_template('index.html',dbname=dbname, dbhost=dbhost,dbport=dbport)
@@ -164,12 +165,23 @@ def add_asset():
         session['error'] = request.form['text']
         return redirect('/already_an_asset')
     if request.method=='GET':
-        sql = "SELECT asset_tag FROM Assets;"
-        cur.execute(sql)
+        nam = "Disposed"
+        sqlx = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+        cur.execute(sqlx,(nam,))
+        resul = cur.fetchone()
+        if resul == None:
+            session['disposed'] = None
+        else:
+            sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+            cur.execute(sqly,(nam,))
+            session['disposed'] = cur.fetchone()
+        sql = "SELECT asset_tag FROM Assets WHERE current_location != %s;"
+        cur.execute(sql,(session['disposed'],))
         res = cur.fetchall()
         session['asset_list'] = res
-        sql2 = "SELECT facility_fk FROM facilities;"
-        cur.execute(sql2)
+        sql2 = "SELECT facility_fk FROM facilities WHERE facility_fk != %s;"
+        nam = 'Disposed'
+        cur.execute(sql2,(nam,))
         res2 = cur.fetchall()
         session['fac_list'] = res2
         return render_template('add_asset.html',data=session['asset_list'])
@@ -192,10 +204,25 @@ def dispose_asset():
                 sql3 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s AND current_location = 3;"
                 cur.execute(sql3,(name,))
                 res3 = cur.fetchone()
+
+                sqlx = "INSERT INTO facilities (facility_fk,fcode) VALUES (%s,%s);"
+                dis = "Disposed"
+                code = 666666
+                sqlz = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+                cur.execute(sqlz,(dis,))
+                session['disposed'] = cur.fetchone()
+                if session['disposed'] == None:
+                    cur.execute(sqlx,(dis,code))
+                    conn.commit()
+
+                sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+                cur.execute(sqly,(dis,))
+                disp_pk = cur.fetchone()
+
                 if res3 == None:
-                    sql4 = "UPDATE Assets SET current_location = 3 WHERE asset_tag = %s"
+                    sql4 = "UPDATE Assets SET current_location = %s WHERE asset_tag = %s"
                     sql5 = "UPDATE Assets SET disposal_date = %s WHERE asset_tag = %s"
-                    cur.execute(sql4,(name,))
+                    cur.execute(sql4,(disp_pk,name,))
                     conn.commit()
                     cur.execute(sql5,(date,name))
                     conn.commit()
@@ -258,8 +285,8 @@ def transfer_req():
         if session['my_role'] == "Facility Officer":
             return redirect('/classified')
         else:
-            sql2 = "SELECT asset_tag,facility_fk FROM Assets,facilities WHERE current_location=facility_pk;"
-            cur.execute(sql2)
+            sql2 = "SELECT asset_tag,facility_fk FROM Assets,facilities WHERE current_location=facility_pk AND facility_pk != %s;"
+            cur.execute(sql2,(session['disposed'],))
             session['asset_fac_list'] = cur.fetchall()
             return render_template('transfer_req.html',data=session['asset_list'])
 #####################################################
@@ -312,14 +339,14 @@ def approve_req():
                 cur.execute(sql3)
                 assets = cur.fetchall()
                 for item in assets:
-                    sql6 = "SELECT asset_tag FROM Assets WHERE asset_pk = %s;"
-                    cur.execute(sql6,(item,))
+                    sql6 = "SELECT asset_tag FROM Assets WHERE asset_pk = %s AND current_location != %s;"
+                    cur.execute(sql6,(item,session['disposed'],))
                     asset_list.append(cur.fetchone())
                     
-                    sql7 = "SELECT current_location FROM Assets WHERE asset_pk = %s;"
-                    cur.execute(sql7,(item,))
+                    sql7 = "SELECT current_location FROM Assets WHERE asset_pk = %s AND current_location != %s;"
+                    cur.execute(sql7,(item,session['disposed'],))
                     fac = cur.fetchone()
-                    sql13 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s;"
+                    sql13 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s AND facility_fk != 'Disposed';"
                     cur.execute(sql13,(fac,))
                     current_loc_list.append(cur.fetchone())
 
