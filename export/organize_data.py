@@ -2,23 +2,32 @@
 
 import sys
 import csv
+import os
 
 
 
-address = str(sys.argv[1]) + '/users.csv'
+address = sys.argv[1] + '/users.csv'
 new_rows = []
 
 def users():
-    with open(address,'rb') as csvfile:
-        #reader = csv.reader(csvfile,delimiter=' ',quotechar='|')
-        reader = csv.reader(csvfile)
+    with open(address,'r') as csvfile:
+        reader = csv.reader(csvfile,delimiter=' ',quotechar='|')
+        #reader = csv.reader(csvfile)
+        data = []
+        title_row = ['username','password','role','active']
+        data.append(title_row)
+        whole = ''
+        count = 0
         for row in reader:
-            new_rows.append(row[2])
-            new_rows.append(row[3])
-            new_rows.append(row[4])
-            new_rows.append(row[5])
+            for i in row:
+                whole += i
+                whole += " "
+            new_row = whole.split(',')
+            data.append(new_row[1::])
+            whole = ''
 
-    with open(adderess,'wb') as csvfile:
-        writer = csv.writer(csvfiel)
-        writer.writerrows(new_rows)
+    with open(address,'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(data)
 
+users()
