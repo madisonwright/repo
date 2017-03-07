@@ -32,6 +32,10 @@ cd $HOME/repo/export
 cp organize_data.py $2
 cd $2
 chmod a+x organize_data.py
-./organize_data.py
+./organize_data.py $2
+
+cd test
+cat users.csv
+cd ..
 
 
