@@ -1,17 +1,37 @@
 
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
     echo "Usage: ./export_data.sh <database> <output dir>"
     exit;
 fi
 
 
-#psql $1 -f create_tables.sql?
-psql $1
+#delete directory if it's there then make a new one
+rm -rf $2
+mkdir $2
 
-#add directory destination into below
-#del dir if it exists, makdir if it doesn't
-Copy (SELECT * FROM Login_info) To '/tmp/users.csv' With CSV DELIMITER ',';
-Copy (SELECT * FROM facilities) To '/tmp/facilities.csv' With CSV DELIMITER ',';
-Copy (SELECT * FROM Assets) To '/tmp/assets.csv' With CSV DELIMITER ',';
-Copy (SELECT * FROM request) To '/tmp/transfers.csv' With CSV DELIMITER ',';
+#the current path you are in, so it will save to wherever you are
+ourpath="$(pwd)"
+psql $1 -c "Copy (SELECT * FROM Login_info) To '$ourpath/users.csv' With CSV DELIMITER ',';"
+psql $1 -c "Copy (SELECT * FROM facilities) To '$ourpath/facilities.csv' With CSV DELIMITER ',';"
+psql $1 -c "Copy (SELECT * FROM Assets) To '$ourpath/assets.csv' With CSV DELIMITER ',';"
+psql $1 -c "Copy (SELECT * FROM request) To '$ourpath/transfers.csv' With CSV DELIMITER ',';"
+
+#copy the files to the destination
+cp users.csv $2
+cp assets.csv $2
+cp facilities.csv $2
+cp transfers.csv $2
+
+rm users.csv
+rm assets.csv
+rm facilities.csv
+rm transfers.csv
+
+cd $HOME/repo/export
+cp organize_data.py $2
+cd $2
+chmod a+x organize_data.py
+./organize_data.py
+
+

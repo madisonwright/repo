@@ -4,7 +4,8 @@ CREATE TABLE Login_info(
 login_pk		serial primary key,
 username		varchar(16),
 password		varchar(16),
-role			text
+role			text,
+Active			boolean DEFAULT true
 );
 
 --facilities contains a name and code. I don't think we need to know which
@@ -28,7 +29,7 @@ arrived			text,
 disposal_date		text
 );
 
-
+---Creates a request table with information aout the request
 Create TABLE request(
 request_pk		serial primary key,
 log_officer		integer REFERENCES Login_info (login_pk),
@@ -44,6 +45,9 @@ asset			integer REFERENCES Assets (asset_pk),
 approved		boolean
 );
 
+
+--- History table that holds all asset transactions.  Not currently implemented since
+--- I did not opt for the extra credit step 7
 Create TABLE History(
 asset			integer REFERENCES Assets (asset_pk),
 current_location	integer REFERENCES facilities (facility_pk),
