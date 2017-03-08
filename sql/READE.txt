@@ -1,4 +1,4 @@
 three files are included in sql along with READE.txt
 
-create_tables.sql creates a table for all the user login input.  I picked an open 16 limit character for both username and password as specified in step 3.  I allowed for numbers in the name, to not discriminate agains people who are 2nds or 3rds of the family name. (ie. William the 3rd)
-
+create_tables.sql creates the database tables.
+I also have the step for csv files stored here for my testing purposes
