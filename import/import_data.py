@@ -32,14 +32,11 @@ def users():
                 data.append(new_row)
                 whole = ''
             count+=1
-        
         for dat in data:
-           # os.system('./test.sh '+str(dat[1]))
             sql = "INSERT INTO Login_info (username,password,role,active) VALUES (%s,%s,%s,%s);"
-            #cur.execute(sql,(dat[1],dat[2],dat[3],dat[4]))
-            #conn.commit()
+            cur.execute(sql,(dat[0],dat[1],dat[2],dat[3]))
+            conn.commit()
     return  
-
 
 def facilities():
     with open(address_f,'r') as csvfile:
@@ -56,12 +53,10 @@ def facilities():
                 data.append(new_row)
                 whole = ''
             count+=1
-        for dat in data:
-            #os.system('./test.sh '+str(dat[1]))    
+        for dat in data:   
             sql2 = "INSERT INTO facilities (facility_fk,code) VALUES (%s,%s);"
-            #cur.execute(sql2,(dat[1],dat[2],))
-             #conn.commit()
-
+            cur.execute(sql2,(dat[1],dat[0],))
+            conn.commit()
     return
 
 
@@ -80,14 +75,11 @@ def assets():
                 data.append(new_row)
                 whole = ''
             count+=1
-        for dat in data:
-            #os.system('./test.sh '+str(dat[1]))   
-            sql3 = "INSERT INTO Assets (asset_tag,description,arrived,disposal_date) VALUES (%s,%s.%s,%s);"
-        #cur.execute(sql3,(dat[1],dat[2],dat[3],dat[4],dat[5],))
-        #conn.commit()
-
+        for dat in data:   
+            sql3 = "INSERT INTO Assets (asset_tag,description,arrived,disposal_date) VALUES (%s,%s,%s,%s);"
+            cur.execute(sql3,(dat[0],dat[1],str(dat[3]),str(dat[4]),))
+            conn.commit()
     return
-
 
 def transfers():
     with open(address_t,'r') as csvfile:
@@ -105,19 +97,30 @@ def transfers():
                 whole = ''
             count+=1
         for dat in data:
-            #os.system('./test.sh '+str(dat[1]))
-            sql4 = "INSERT INTO request (log_officer,fac_officer,submit_date,approved_date,load_time,unload_time,destination,asset) VALUES (%s,%s.%s,%s,%s,%s,%s,%s);"
-            #cur.execute(sql4,(dat[1],dat[3],dat[2],dat[4],dat[7],dat[8],dat[6],dat[0],))
-            #conn.commit()
+            sql4 = "INSERT INTO request (log_officer,fac_officer,submit_date,submit_time,approved_date,approved_time,load_time,unload_time,destination,asset) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+            sql5 = "SELECT facility_pk FROM facilities WHERE code = %s"
+            sql6 = "SELECT login_pk FROM Login_info WHERE username = %s"
+            sql7 = "SELECT asset_pk FROM Assets WHERE asset_tag = %s"
+            cur.execute(sql5,(dat[6],))
+            dest = cur.fetchone()
+            cur.execute(sql6,(dat[1],))
+            user1 = cur.fetchone()
+            cur.execute(sql6,(dat[3],))
+            user2 = cur.fetchone()
+            cur.execute(sql7,(str(dat[0]),))
+            asset = cur.fetchone()
+            sub_dt = str(dat[2]).split(' ')
+            app_dt = str(dat[4]).split(' ')
+            cur.execute(sql4,(user1,user2,sub_dt[0],sub_dt[1],app_dt[0],app_dt[1],str(dat[7]),str(dat[8]),dest,asset,))
+            conn.commit()
             sql5 = "UPDATE request SET approved = 't' WHERE approved_date IS NOT NULL"
-            #cur.execute(sql5)
-            #conn.commit()
-
+            cur.execute(sql5)
+            conn.commit()
     return
 
 
 users()
-assets()
 facilities()
+assets()
 transfers()
 
