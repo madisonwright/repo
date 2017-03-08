@@ -14,8 +14,8 @@ fi
 # Database prep
 cd sql
 psql $1 -f create_tables.sql
-curl -O https://classes.cs.uoregon.edu//17W/cis322/files/osnap_legacy.tar.gz
-tar -xzf osnap_legacy.tar.gz
+curl -O https://classes.cs.uoregon.edu//17W/cis322/files/lost_data.tar.gz
+tar -xzf lost_data.tar.gz
 cd ..
 
 # Install the wsgi files
