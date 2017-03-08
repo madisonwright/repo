@@ -97,7 +97,7 @@ def add_facility():
         name = request.form['text']
         fcode = request.form['fcode']
         if len(name) < 33:
-            if len(fcode) < 77:
+            if len(fcode) < 7:
                 session['text']=name
                 session['code']=fcode
             else:
@@ -202,29 +202,27 @@ def dispose_asset():
             if res2 == None:
                 return redirect('/not_an_asset')
             else:
-                
-               # sqlx = "INSERT INTO facilities (facility_fk,fcode) VALUES (%s,%s);"
-                #dis = "Disposed"
-                #code = 666666
                 sqlz = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
                 nam = 'Disposed'
                 cur.execute(sqlz,(nam,))
                 session['disposed'] = cur.fetchone()
 
+                if session['disposed'] == None:
+                    sqlx = "INSERT INTO facilities (facility_fk,fcode) VALUES (%s,%s);"
+                    dis = "Disposed"
+                    code = 666666
+                    cur.execute(sqlx,(dis,code))
+                    conn.commit()
+
+                sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+                cur.execute(sqly,(nam,))
+                disp_pk = cur.fetchone()
+
                 sql3 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s AND current_location = %s;"
                 cur.execute(sql3,(name,session['disposed'],))
                 res3 = cur.fetchone()
 
-
-
-                #if session['disposed'] == None:
-                   # cur.execute(sqlx,(dis,code))
-                 #   conn.commit()
-
-                #sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
-               # cur.execute(sqly,(nam,))
-               # disp_pk = cur.fetchone()
-
+                
                 if res3 == None:
                     sql4 = "UPDATE Assets SET current_location = %s WHERE asset_tag = %s"
                     sql5 = "UPDATE Assets SET disposal_date = %s WHERE asset_tag = %s"
