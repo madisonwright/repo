@@ -22,20 +22,21 @@ cp users.csv $2
 cp assets.csv $2
 cp facilities.csv $2
 cp transfers.csv $2
+cp test.sh $2
 
+#clean the current workspace
 rm users.csv
 rm assets.csv
 rm facilities.csv
 rm transfers.csv
 
+#go to the export folder of the git repo you just pulled down, copy py file to the destination too
 cd $HOME/repo/export
 cp organize_data.py $2
+
+#go to the destination and sort the csv files into proper format
 cd $2
 chmod a+x organize_data.py
 ./organize_data.py $2
-
-cd test
-cat users.csv
-cd ..
 
 
