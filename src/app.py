@@ -161,11 +161,14 @@ def add_facility():
             return redirect('/already_a_facility')
         return redirect('/login')
     if request.method=='GET':
-        sql = "SELECT facility_fk FROM facilities;"
-        cur.execute(sql)
-        res = cur.fetchall()
-        session['facilities_list'] = res
-        return render_template('add_facility.html',data=session['facilities_list'])
+        if 'mytext' in session:
+            sql = "SELECT facility_fk FROM facilities;"
+            cur.execute(sql)
+            res = cur.fetchall()
+            session['facilities_list'] = res
+            return render_template('add_facility.html',data=session['facilities_list'])
+        else:
+            return redirect('/access_denied')
 ##############################################################
 
 @app.route('/add_asset', methods=['POST','GET'])
@@ -200,75 +203,81 @@ def add_asset():
         session['error'] = request.form['text']
         return redirect('/already_an_asset')
     if request.method=='GET':
-        nam = "Disposed"
-        sqlx = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
-        cur.execute(sqlx,(nam,))
-        resul = cur.fetchone()
-        if resul == None:
-            session['disposed'] = None
+        if 'mytext' in session:
+            nam = "Disposed"
+            sqlx = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+            cur.execute(sqlx,(nam,))
+            resul = cur.fetchone()
+            if resul == None:
+                session['disposed'] = None
+            else:
+                sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+                cur.execute(sqly,(nam,))
+                session['disposed'] = cur.fetchone()
+            sql = "SELECT asset_tag FROM Assets WHERE current_location != %s;"
+            cur.execute(sql,(session['disposed'],))
+            res = cur.fetchall()
+            session['asset_list'] = res
+            sql2 = "SELECT facility_fk FROM facilities WHERE facility_fk != %s;"
+            nam = 'Disposed'
+            cur.execute(sql2,(nam,))
+            res2 = cur.fetchall()
+            session['fac_list'] = res2
+            return render_template('add_asset.html',data=session['asset_list'])
         else:
-            sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
-            cur.execute(sqly,(nam,))
-            session['disposed'] = cur.fetchone()
-        sql = "SELECT asset_tag FROM Assets WHERE current_location != %s;"
-        cur.execute(sql,(session['disposed'],))
-        res = cur.fetchall()
-        session['asset_list'] = res
-        sql2 = "SELECT facility_fk FROM facilities WHERE facility_fk != %s;"
-        nam = 'Disposed'
-        cur.execute(sql2,(nam,))
-        res2 = cur.fetchall()
-        session['fac_list'] = res2
-        return render_template('add_asset.html',data=session['asset_list'])
+            return redirect('/access_denied')
+
 ##############################################################
 
 @app.route('/dispose_asset', methods=['GET','POST'])
 def dispose_asset():
-    if session['my_role'] == "Facility Officer":
-        return redirect('/classified')
-    else:
-        if request.method=='POST' and 'text' in request.form:
-            name = request.form['text']
-            date = request.form['date']
-            sql2 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s;"
-            cur.execute(sql2,(name,))
-            res2 = cur.fetchone()
-            if res2 == None:
-                return redirect('/not_an_asset')
+    if request.method=='POST' and 'text' in request.form:
+        name = request.form['text']
+        date = request.form['date']
+        sql2 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s;"
+        cur.execute(sql2,(name,))
+        res2 = cur.fetchone()
+        if res2 == None:
+            return redirect('/not_an_asset')
+        else:
+            sqlz = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+            nam = 'Disposed'
+            cur.execute(sqlz,(nam,))
+            session['disposed'] = cur.fetchone()
+
+            if session['disposed'] == None:
+                sqlx = "INSERT INTO facilities (facility_fk,fcode) VALUES (%s,%s);"
+                dis = "Disposed"
+                code = 666666
+                cur.execute(sqlx,(dis,code))
+                conn.commit()
+
+            sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
+            cur.execute(sqly,(nam,))
+            disp_pk = cur.fetchone()
+
+            sql3 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s AND current_location = %s;"
+            cur.execute(sql3,(name,session['disposed'],))
+            res3 = cur.fetchone()
+           
+            if res3 == None:
+                sql4 = "UPDATE Assets SET current_location = %s WHERE asset_tag = %s"
+                sql5 = "UPDATE Assets SET disposal_date = %s WHERE asset_tag = %s"
+                cur.execute(sql4,(session['disposed'],name,))
+                conn.commit()
+                cur.execute(sql5,(date,name))
+                conn.commit()
+                return redirect('/dashboard')
             else:
-                sqlz = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
-                nam = 'Disposed'
-                cur.execute(sqlz,(nam,))
-                session['disposed'] = cur.fetchone()
-
-                if session['disposed'] == None:
-                    sqlx = "INSERT INTO facilities (facility_fk,fcode) VALUES (%s,%s);"
-                    dis = "Disposed"
-                    code = 666666
-                    cur.execute(sqlx,(dis,code))
-                    conn.commit()
-
-                sqly = "SELECT facility_pk FROM facilities WHERE facility_fk = %s;"
-                cur.execute(sqly,(nam,))
-                disp_pk = cur.fetchone()
-
-                sql3 = "SELECT asset_tag FROM Assets WHERE asset_tag = %s AND current_location = %s;"
-                cur.execute(sql3,(name,session['disposed'],))
-                res3 = cur.fetchone()
-
-                
-                if res3 == None:
-                    sql4 = "UPDATE Assets SET current_location = %s WHERE asset_tag = %s"
-                    sql5 = "UPDATE Assets SET disposal_date = %s WHERE asset_tag = %s"
-                    cur.execute(sql4,(session['disposed'],name,))
-                    conn.commit()
-                    cur.execute(sql5,(date,name))
-                    conn.commit()
-                    return redirect('/dashboard')
-                else:
-                    return redirect('/already_disposed')
-        if request.method=='GET':
+                return redirect('/already_disposed')
+    if request.method=='GET':
+        if 'mytext' in session:
+            if session['my_role'] == "Facility Officer":
+                 return redirect('/classified')
             return render_template('dispose_asset.html')
+        else:
+            return redirect('/access_denied')
+
 #########################################################
 
 @app.route('/asset_report', methods=['POST','GET'])
@@ -290,7 +299,11 @@ def asset_report():
             session['report'] = cur.fetchall()
             return redirect('/asset_report')
     if request.method=='GET':
+        if 'mytext' in session:
             return render_template('asset_report.html',data=session['report'])
+        else:
+            return redirect('/access_denied')
+
 #############################################
 
 @app.route('/transfer_req',methods=['POST','GET'])
@@ -320,13 +333,17 @@ def transfer_req():
         return redirect('/request_made')
 
     if request.method=="GET":
-        if session['my_role'] == "Facility Officer":
-            return redirect('/classified')
+        if 'mytext' in session:
+            if session['my_role'] == "Facility Officer":
+                return redirect('/classified')
+            else:
+                sql2 = "SELECT asset_tag,facility_fk FROM Assets,facilities WHERE current_location=facility_pk AND facility_pk != %s;"
+                cur.execute(sql2,(session['disposed'],))
+                session['asset_fac_list'] = cur.fetchall()
+                return render_template('transfer_req.html',data=session['asset_list'])
         else:
-            sql2 = "SELECT asset_tag,facility_fk FROM Assets,facilities WHERE current_location=facility_pk AND facility_pk != %s;"
-            cur.execute(sql2,(session['disposed'],))
-            session['asset_fac_list'] = cur.fetchall()
-            return render_template('transfer_req.html',data=session['asset_list'])
+            return redirect('/access_denied')
+
 #####################################################
 @app.route('/approve_req', methods=['GET','POST'])
 def approve_req():
@@ -353,56 +370,60 @@ def approve_req():
         return redirect('dashboard')
 
     if request.method=="GET":
-        if session['my_role'] == "Logistics Officer":
-            return redirect('/classified')
-        else:
-            sql = "SELECT * FROM request;"
-            cur.execute(sql)
-            res = cur.fetchone()
-            if res == None:
-                return redirect('/no_requests')
+        if 'mytext' in session:
+            if session['my_role'] == "Logistics Officer":
+                return redirect('/classified')
             else:
-                asset_list = []
-                current_loc_list = []
-                destination_list = []
-                request_num_list = []
+                sql = "SELECT * FROM request;"
+                cur.execute(sql)
+                res = cur.fetchone()
+                if res == None:
+                    return redirect('/no_requests')
+                else:
+                    asset_list = []
+                    current_loc_list = []
+                    destination_list = []
+                    request_num_list = []
 
-                sql9 = "SELECT request_pk FROM request WHERE approved = 'f';"
-                cur.execute(sql9)
-                requests = cur.fetchall()
-                for item2 in requests:
-                    request_num_list.append(item2)
-                
-                sql3 = "SELECT asset FROM request WHERE approved = 'f';"
-                cur.execute(sql3)
-                assets = cur.fetchall()
-                for item in assets:
-                    sql6 = "SELECT asset_tag FROM Assets WHERE asset_pk = %s AND current_location != %s;"
-                    cur.execute(sql6,(item,session['disposed'],))
-                    asset_list.append(cur.fetchone())
+                    sql9 = "SELECT request_pk FROM request WHERE approved = 'f';"
+                    cur.execute(sql9)
+                    requests = cur.fetchall()
+                    for item2 in requests:
+                        request_num_list.append(item2)
                     
-                    sql7 = "SELECT current_location FROM Assets WHERE asset_pk = %s AND current_location != %s;"
-                    cur.execute(sql7,(item,session['disposed'],))
-                    fac = cur.fetchone()
-                    sql13 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s AND facility_fk != 'Disposed';"
-                    cur.execute(sql13,(fac,))
-                    current_loc_list.append(cur.fetchone())
+                    sql3 = "SELECT asset FROM request WHERE approved = 'f';"
+                    cur.execute(sql3)
+                    assets = cur.fetchall()
+                    for item in assets:
+                        sql6 = "SELECT asset_tag FROM Assets WHERE asset_pk = %s AND current_location != %s;"
+                        cur.execute(sql6,(item,session['disposed'],))
+                        asset_list.append(cur.fetchone())
+                        
+                        sql7 = "SELECT current_location FROM Assets WHERE asset_pk = %s AND current_location != %s;"
+                        cur.execute(sql7,(item,session['disposed'],))
+                        fac = cur.fetchone()
+                        sql13 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s AND facility_fk != 'Disposed';"
+                        cur.execute(sql13,(fac,))
+                        current_loc_list.append(cur.fetchone())
 
-                sql4 = "SELECT destination from request WHERE approved = 'f';"
-                cur.execute(sql4)
-                destinations = cur.fetchall()
-                for item3 in destinations:
-                    sql8 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s;"
-                    cur.execute(sql8,(item3,))
-                    destination_list.append(cur.fetchone())
+                    sql4 = "SELECT destination from request WHERE approved = 'f';"
+                    cur.execute(sql4)
+                    destinations = cur.fetchall()
+                    for item3 in destinations:
+                        sql8 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s;"
+                        cur.execute(sql8,(item3,))
+                        destination_list.append(cur.fetchone())
 
-                request_list = []
-                reques = ''
-                for i in range(len(asset_list)):
-                    reques = "request number: " + str(request_num_list[i]) + "    " + str(asset_list[i]) + " at location: " + str(current_loc_list[i]) + " requested to be moved to: " + str(destination_list[i])
-                    request_list.append(reques)
-                session['request_list'] = request_num_list
-                return render_template('approve.html',data=request_list)
+                    request_list = []
+                    reques = ''
+                    for i in range(len(asset_list)):
+                        reques = "request number: " + str(request_num_list[i]) + "    " + str(asset_list[i]) + " at location: " + str(current_loc_list[i]) + " requested to be moved to: " + str(destination_list[i])
+                        request_list.append(reques)
+                    session['request_list'] = request_num_list
+                    return render_template('approve.html',data=request_list)
+        else:
+            return redirect('/access_denied')
+
 #######################################################
 
 @app.route('/update_transit',methods=['GET','POST'])
@@ -417,35 +438,35 @@ def update_transit():
         return redirect('dashboard')
 
     if request.method=="GET":
-        if session['my_role'] == "Facility Officer":
-            return redirect('/classified')
+        if 'mytext' in session:
+            if session['my_role'] == "Facility Officer":
+                return redirect('/classified')
+            else:
+                approved_req_list = []
+                approved_req_num = []
+                sql = "SELECT * FROM request WHERE approved = 't' AND load_time IS NULL;"
+                cur.execute(sql)
+                approved = cur.fetchall()
+                if len(approved) < 1:
+                    return redirect('/no_requests')
+                for item in approved:
+                    asset = item[10]
+                    destination = item[9]
+                    req_num = item[0]
+                    sql2 = "SELECT asset_tag FROM Assets WHERE asset_pk = %s"
+                    sql3 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s"
+                    cur.execute(sql2,(asset,))
+                    asset_name = cur.fetchone()
+                    cur.execute(sql3,(destination,))
+                    dest = cur.fetchone()
+                    approved_req = "Request number: " + str(req_num) + "  Asset: " + str(asset_name) + " approved to travel to destination: " + str(dest)
+                    approved_req_list.append(approved_req)
+                    approved_req_num.append(item[0])
+                session['approved_req_list'] = approved_req_list
+                session['approved_req_num'] = approved_req_num
+                return render_template('update_transit.html',data=session['approved_req_list'])
         else:
-            approved_req_list = []
-            approved_req_num = []
-            sql = "SELECT * FROM request WHERE approved = 't' AND load_time IS NULL;"
-            cur.execute(sql)
-            approved = cur.fetchall()
-            if len(approved) < 1:
-                return redirect('/no_requests')
-            for item in approved:
-                asset = item[10]
-                destination = item[9]
-                req_num = item[0]
-                sql2 = "SELECT asset_tag FROM Assets WHERE asset_pk = %s"
-                sql3 = "SELECT facility_fk FROM facilities WHERE facility_pk = %s"
-                cur.execute(sql2,(asset,))
-                asset_name = cur.fetchone()
-                cur.execute(sql3,(destination,))
-                dest = cur.fetchone()
-                approved_req = "Request number: " + str(req_num) + "  Asset: " + str(asset_name) + " approved to travel to destination: " + str(dest)
-                approved_req_list.append(approved_req)
-                approved_req_num.append(item[0])
-            session['approved_req_list'] = approved_req_list
-            session['approved_req_num'] = approved_req_num
-            
-
-
-            return render_template('update_transit.html',data=session['approved_req_list'])
+            return redirect('/access_denied')
 
 
 
@@ -453,22 +474,26 @@ def update_transit():
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    session['report'] = ""
-    if session['my_role'] == "Facility Officer":
-        sql = "SELECT request_pk FROM request WHERE approved = %s;"
-        boole = False
-        cur.execute(sql,(boole,))
-        res = cur.fetchall()
-        length = len(res)
-        session['requests'] = length
-        return render_template('dashboard_fac.html',data=session['mytext'],data2=session['requests'])
+    if 'mytext' in session:
+        session['report'] = ""
+        if session['my_role'] == "Facility Officer":
+            sql = "SELECT request_pk FROM request WHERE approved = %s;"
+            boole = False
+            cur.execute(sql,(boole,))
+            res = cur.fetchall()
+            length = len(res)
+            session['requests'] = length
+            return render_template('dashboard_fac.html',data=session['mytext'],data2=session['requests'])
+        else:
+            sql2 = "SELECT request_pk FROM request WHERE approved = 't' AND load_time IS NULL;"
+            cur.execute(sql2)
+            res2 = cur.fetchall()
+            length2 = len(res2)
+            session['req_updates'] = length2
+            return render_template('dashboard.html',data=session['mytext'],data2=session['req_updates'])
     else:
-        sql2 = "SELECT request_pk FROM request WHERE approved = 't' AND load_time IS NULL;"
-        cur.execute(sql2)
-        res2 = cur.fetchall()
-        length2 = len(res2)
-        session['req_updates'] = length2
-        return render_template('dashboard.html',data=session['mytext'],data2=session['req_updates'])
+        return redirect('/access_denied')
+
 
 @app.route('/not_a_user')
 def not_a_user():
@@ -506,8 +531,11 @@ def request_made():
 def no_requests():
     return render_template('no_requests.html')
 
+@app.route('/access_denied')
+def access_denied():
+    return render_template('denied.html')
+
 @app.route('/logout')
 def logout():
-    session['mytext']= ""
-    session['my_role'] = ""
+    session.clear()
     return redirect('/login')
