@@ -8,6 +8,7 @@ import datetime
 from urllib.request import Request, urlopen
 from urllib.parse   import urlencode
 
+
 def main():
     # Check the CLI arguments
     if len(sys.argv)<4 :
@@ -16,28 +17,27 @@ def main():
     
     # Prep the arguments blob
     args = dict()
-    args['mytext'] = sys.argv[2]
-    args['password'] = sys.argv[3]
+    args['mytext']  = sys.argv[2]
+    args['pass'] = sys.argv[3]
     args['role'] = sys.argv[4]
 
     # Print a message to let the user know what is being tried
     print("Activating user: %s"%args['mytext'])
 
     # Setup the data to send
-    sargs = dict()
-    sargs['arguments']=json.dumps(args)
-    sargs['signature']=''
-    data = urlencode(sargs)
+    data = urlencode(args)
     
-    req = Request(sys.argv[1] + 'activate_user',data.encode('ascii'),method='POST')
+    
+    myroute = sys.argv[1] + 'activate_user' 
+    req = Request(myroute,data.encode('ascii'),method='POST')
+
+
 
     res = urlopen(req)
 
-    # Parse the response
-    resp = json.loads(res.read().decode('ascii'))
     
     # Print the result code
-    print("Call to LOST returned: %s"%resp['result'])
+    print("Call to LOST returned: %s")
 
     
 if __name__=='__main__':

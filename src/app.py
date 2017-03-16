@@ -69,7 +69,6 @@ def activate_user():
         else:
             return redirect('already_a_user')
         sql = "SELECT username FROM login_info WHERE username = %s;"
-        print('bb')
         cur.execute(sql,(name,))
         res = cur.fetchone()
         if res == None:
@@ -157,7 +156,6 @@ def add_facility():
             return redirect('/already_a_facility')
         return redirect('/login')
     if request.method=='GET':
-
         sql = "SELECT facility_fk FROM facilities;"
         cur.execute(sql)
         res = cur.fetchall()
@@ -506,4 +504,5 @@ def no_requests():
 @app.route('/logout')
 def logout():
     session['mytext']= ""
+    session['my_role'] = ""
     return redirect('/login')
