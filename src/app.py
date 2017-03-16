@@ -52,7 +52,7 @@ def login():
         return render_template('login.html')
 #####################################################
 
-@app.route('/activate_user', methods=['POST','GET'])
+@app.route('/activate_user', methods=['POST'])#,'GET'])
 def activate_user():
     if request.method=='POST' and 'mytext' in request.form:
         name = request.form['mytext']
@@ -65,9 +65,11 @@ def activate_user():
                 session['pass']=password
                 session['role']=role
             else:
-                return redirect('already_a_user')
+                error = 'p'
+                return error
         else:
-            return redirect('already_a_user')
+            error = 'f'
+            return error
         sql = "SELECT username FROM login_info WHERE username = %s;"
         cur.execute(sql,(name,))
         res = cur.fetchone()
@@ -76,32 +78,33 @@ def activate_user():
             cur.execute(new,(name,password,role,active,))
             conn.commit()
             
-            sql2 = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
-            cur.execute(sql2,(session['mytext'],))
-            res2 = cur.fetchone()
-            if res2 == None:
-                session['my_role'] = "Facility Officer"
-                return redirect('/dashboard')
-            else:
-                session['my_role'] = "Logistics Officer"
-                return redirect('/dashboard')
+            #sql2 = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
+            #cur.execute(sql2,(session['mytext'],))
+            #res2 = cur.fetchone()
+            #if res2 == None:
+            #    session['my_role'] = "Facility Officer"
+            #    return redirect('/dashboard')
+            #else:
+            #    session['my_role'] = "Logistics Officer"
+            #    return redirect('/dashboard')
         else:
             sql3 = "UPDATE Login_info SET (password,active) = (%s,%s) WHERE username = %s"
             cur.execute(sql3,(password,active,name,))
             conn.commit()
-            sql4 = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
-            cur.execute(sql4,(session['mytext'],))
-            res3 = cur.fetchone()
-            if res3 == None:
-                session['my_role'] = "Facility Officer"
-                return redirect('/dashboard')
-            else:
-                session['my_role'] = "Logistics Officer"
-                return redirect('/dashboard')
-    if request.method=='GET':
-        return render_template('create_user.html')
+            #sql4 = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
+            #cur.execute(sql4,(session['mytext'],))
+            #res3 = cur.fetchone()
+            #if res3 == None:
+            #    session['my_role'] = "Facility Officer"
+            #    return redirect('/dashboard')
+            #else:
+            #    session['my_role'] = "Logistics Officer"
+            #    return redirect('/dashboard')
+        return active
+    #if request.method=='GET':
+        #return render_template('create_user.html')
 ###########################################################
-@app.route('/revoke_user', methods=['POST','GET'])
+@app.route('/revoke_user', methods=['POST'])#,'GET'])
 def revoke_user():
     if request.method=='POST' and 'mytext' in request.form:
         name = request.form['mytext']
@@ -109,14 +112,16 @@ def revoke_user():
         cur.execute(sql,(name,))
         res = cur.fetchone()
         if res == None:
-            return redirect('/dashboard')
+            bad_user = 'f'
+            return bad_user
         sql2 = "UPDATE Login_info SET active = 'f' WHERE username = %s;"
         cur.execute(sql2,(name,))
         conn.commit()
-        return redirect('dashboard')
+        good_user = 't'
+        return good_user
 
-    if request.method=='GET':
-        return render_template('revoke_user.html')
+    #if request.method=='GET':
+        #return render_template('revoke_user.html')
 
 
 ###########################################################
