@@ -1,4 +1,0 @@
-three files are included in sql along with READE.txt
-
-create_tables.sql creates the database tables.
-I also have the step for csv files stored here for my testing purposes
