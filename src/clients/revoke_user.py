@@ -11,41 +11,33 @@ from urllib.parse   import urlencode
 
 def main():
     # Check the CLI arguments
-    if len(sys.argv)<4 :
-        print("Usage: python3 %s <url> <username> <password> <role>"%sys.argv[0])
+    if len(sys.argv)<2 :
+        print("Usage: python3 %s <url> <username>"%sys.argv[0])
         return
     
     # Prep the arguments blob
     args = dict()
     args['mytext']  = sys.argv[2]
-    args['pass'] = sys.argv[3]
-    if sys.argv[4] == 'facofc':
-        args['role'] = 'Facilities Officer'
-    else:
-        args['role'] = 'Logistics Officer'
 
     # Print a message to let the user know what is being tried
-    print("Activating user: %s"%args['mytext'])
+    print("Revoking user: %s"%args['mytext'])
 
     # Setup the data to send
     data = urlencode(args)
     
     
-    myroute = sys.argv[1] + 'activate_user' 
+    myroute = sys.argv[1] + 'revoke_user' 
     req = Request(myroute,data.encode('ascii'),method='POST')
 
 
     #activate
     res = urlopen(req)
-
+    
     result = res.read()
     if result == bytes('t','utf-8'):
-        print("User successfully activated")
-    elif result == bytes('p','utf-8'):
-        print("Unable to create user; password too long")
+        print("User successfully revoked")
     else:
-        print("Unable to create user; username too long")
-
+        print("Unable to revoke user; user does not exist")
     
 if __name__=='__main__':
     main()
