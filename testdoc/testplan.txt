@@ -1,0 +1,68 @@
+Test Plan
+
+**********Repo Installation***********
+
+1.  Does my repo have;
+	1a.  assignment6,7,8,9,10 branches?
+	1b.  lost_archived branch?
+		*1bb.  Does it contain a working install_daemons.sh?
+	1c.  sql,src,import,export and testdoc directories?
+		1cc.  Does the testdoc contain a pdf of the Test Plan?
+
+
+
+2.  Does my repo have 
+
+3.  Does my preflight.sh(in repo) work?
+
+**********Client Functionality***********
+
+*4.  Do activate_user.py and revoke_user.py(located in clients) work?
+	4a.  Can you create a user with activate_user?
+	4b.  Does it update a users password?
+	4c.  Does revoke_user turn a users active cell from 't' to 'f'?
+	4d.  Does activate_user.py turns a users cell from 'f' to 't'?
+
+***************Webpage****************
+
+5.  Does the '/' page redirect to the login page?
+	5a.  Can you Log in?
+	5b.  Is your login name present on the dashboard?
+	5c.  Can you log out?
+	5d.  Can you access other pages without logging in?
+
+6.  If you are a Logistics Officer:
+	6a.  Is there a button to dispose assets and transfer requests?
+	6b.  Is there a functioning link about pending transfer updates?
+	6c.  There should NOT be a button for approve request
+	6d.  Go to the url for '/approve_request', it should be classified
+
+7.  If you are a Facilities Officer:
+	7a.  Is there a button for pending requests?
+	7b.  Is there a link for pending requests?
+	7c.  Go to the url for '/dispose_assets' and '/transfer_reqeust', they should be classified.
+
+8.  Do the 'add facility','add asset' and 'asset report' buttons direct to the appropriate pages?
+	8a.  Create two facilities, and two assets.
+	8b.  Dispose of one asset
+	8c.  Check the database to see if they were entered correctly
+		8cc. Note that a disposed asset is located at a 'Disposed' facility
+
+9.  Does the asset report page work?
+	9a.  Can you submit a report for a facility and day?
+	9b.  Can you submit a report for just a day?
+	9c.  Does asset information appear when it should
+
+**************Database**************
+
+10.  Does the import_data.sh(located in import) import data correctly?
+	10a.  Note that preflight already downloaded the class csv files for importing.  Se preflight.sh for lines to test it.
+
+
+
+
+
+
+
+
+
