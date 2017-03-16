@@ -52,12 +52,13 @@ def login():
         return render_template('login.html')
 #####################################################
 
-@app.route('/create_user', methods=['POST','GET'])
-def create_user():
+@app.route('/activate_user', methods=['POST','GET'])
+def activate_user():
     if request.method=='POST' and 'mytext' in request.form:
         name = request.form['mytext']
         password = request.form['pass']
         role = request.form['role']
+        active ='t'
         if len(name) < 17:
             if len(password) < 17:
                 session['mytext']=name
@@ -68,11 +69,12 @@ def create_user():
         else:
             return redirect('already_a_user')
         sql = "SELECT username FROM login_info WHERE username = %s;"
+        print('bb')
         cur.execute(sql,(name,))
         res = cur.fetchone()
         if res == None:
-            new = "INSERT INTO login_info (username, password, role) VALUES (%s,%s,%s);"
-            cur.execute(new,(name,password,role,))
+            new = "INSERT INTO login_info (username, password, role, active) VALUES (%s,%s,%s,%s);"
+            cur.execute(new,(name,password,role,active,))
             conn.commit()
             
             sql2 = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
@@ -85,8 +87,18 @@ def create_user():
                 session['my_role'] = "Logistics Officer"
                 return redirect('/dashboard')
         else:
-            return redirect('/already_a_user')
-
+            sql3 = "UPDATE Login_info SET (password,active) = (%s,%s) WHERE username = %s"
+            cur.execute(sql3,(password,active,name,))
+            conn.commit()
+            sql4 = "SELECT username FROM Login_info WHERE username = %s AND role = 'Logistics Officer';"
+            cur.execute(sql4,(session['mytext'],))
+            res3 = cur.fetchone()
+            if res3 == None:
+                session['my_role'] = "Facility Officer"
+                return redirect('/dashboard')
+            else:
+                session['my_role'] = "Logistics Officer"
+                return redirect('/dashboard')
     if request.method=='GET':
         return render_template('create_user.html')
 ##########################################################3
