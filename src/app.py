@@ -33,7 +33,7 @@ def login():
         if res == None:
             return redirect('/not_a_user')
         else:
-            sql = "SELECT username FROM login_info WHERE username = %s AND password = %s"
+            sql = "SELECT username FROM login_info WHERE username = %s AND password = %s AND active = 't';"
             cur.execute(sql,(name,password))
             res = cur.fetchone()
             if res == None:
@@ -101,8 +101,26 @@ def activate_user():
                 return redirect('/dashboard')
     if request.method=='GET':
         return render_template('create_user.html')
-##########################################################3
+###########################################################
+@app.route('/revoke_user', methods=['POST','GET'])
+def revoke_user():
+    if request.method=='POST' and 'mytext' in request.form:
+        name = request.form['mytext']
+        sql = "SELECT username FROM Login_info WHERE username = %s;"
+        cur.execute(sql,(name,))
+        res = cur.fetchone()
+        if res == None:
+            return redirect('/dashboard')
+        sql2 = "UPDATE Login_info SET active = 'f' WHERE username = %s;"
+        cur.execute(sql2,(name,))
+        conn.commit()
+        return redirect('dashboard')
 
+    if request.method=='GET':
+        return render_template('revoke_user.html')
+
+
+###########################################################
 @app.route('/add_facility', methods=['POST','GET'])
 def add_facility():
     if request.method=='POST' and 'text' in request.form:
@@ -139,6 +157,7 @@ def add_facility():
             return redirect('/already_a_facility')
         return redirect('/login')
     if request.method=='GET':
+
         sql = "SELECT facility_fk FROM facilities;"
         cur.execute(sql)
         res = cur.fetchall()
