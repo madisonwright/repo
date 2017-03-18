@@ -1,27 +1,60 @@
 
 <html>
-	<body><h2>Dashboard</h2>Welcome {{data}}
+<style>
+	h2 {
+		font-size: 250%;	
+	}
+	h3 {
+		font-size: 200%;
+		text-color: #005599;
+		border: 5px dotted #005599;
+	}
+	body {
+		background: #00AFA0 url("https://image.freepik.com/free-vector/abstract-background-in-geometric-style_1013-17.jpg");
+		background-size: 1366px 768px;
+	}
+	.button {
+		background-color: #00AFA0;
+		color: white;
+		cursor: pointer;
+		padding: 5px 10px;
+		text-align: center;
+	}
+	p {
+		text-decoration: underline;
+		text-decoration: bold;
+		font-size: 150%
+	}
+	form {
+		font-size: 150%;
+	}
+	a {
+		color: #ad1463;
+	}
+</style>
+	<body><h2>Dashboard</h2>
+		<h3>Welcome {{data}}</h3>
 		<p>Menu</p>
 		<form action="http://127.0.0.1:8080/add_facility">
-			<input type="submit" value="Add Facility" />	
+			<input type="submit" value="Add Facility" class="button" />	
 		</form>
 		<form action="http://127.0.0.1:8080/add_asset">
-			<input type="submit" value="Add Asset" />	
+			<input type="submit" value="Add Asset" class="button" />	
 		</form>
 		<form action="http://127.0.0.1:8080/dispose_asset">
-			<input type="submit" value="Dispose Asset" />	
+			<input type="submit" value="Dispose Asset" class="button"/>	
 		</form>
 		<form action="http://127.0.0.1:8080/asset_report">
-			<input type="submit" value="Asset Report" />	
+			<input type="submit" value="Asset Report" class="button"/>	
 		</form>
 		<form action="http://127.0.0.1:8080/transfer_req">
-			<input type="submit" value="Make Transfer Request" />	
+			<input type="submit" value="Make Transfer Request" class="button"/>	
 		</form>
 		<form action="http://127.0.0.1:8080/update_transit">
-			<input type="submit" value="Update Request" />	
+			<input type="submit" value="Update Request" class="button" />	
 		</form>
 		<form action="http://127.0.0.1:8080/logout">
-			<input type="submit" value="Logout" />	
+			<input type="submit" value="Logout" class="button"/>	
 		</form>
 		{{data2}} <a href="http://127.0.0.1:8080/update_transit">Pending updates</a>
 	</body>

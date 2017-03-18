@@ -1,9 +1,39 @@
 
 <html>
+<style>
+	h2 {
+		font-size: 250%;	
+	}
+	h3 {
+		font-size: 150%;
+		border: 5px dotted #005599;
+	}
+	body {
+		background: #00AFA0 url("https://image.freepik.com/free-vector/abstract-background-in-geometric-style_1013-17.jpg");
+		background-size: 1366px 768px;
+	}
+	.button {
+		background-color: #00AFA0;
+		color: white;
+		cursor: pointer;
+		padding: 5px 10px;
+		text-align: center;
+	}
+	p {
+		font-size: 125%;
+	}
+	form {
+		font-size: 150%;
+	}
+	a {
+		color: #ad1463;
+	}
+</style>
+	
 	<body><h2>Not an Asset</h2>error: {{data}}
 		<p>not a valid asset name, try again.</p>
 		<form action="http://127.0.0.1:8080/dispose_asset">
-			<input type="submit" value="Dispose Asset" />
+			<input type="submit" value="Dispose Asset" class="button"/>
 		</form>
 	</body>
 </html>
