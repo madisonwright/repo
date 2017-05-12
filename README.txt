@@ -1,3 +1,10 @@
+This is a program to create a local host website that allows for users to login and work with assets.
+
+Disclaimer for potential employers: This was created in a CIS 322 class where I learned apache, flask, json, html, 
+virtual machine and how they all interact.  This program was created on a weekly basis without knowing what the 
+next week would entail, ie. there is a lot of unnecessary code.
+
+
 Export:
 	contains files used to export my database data into csv files, also has a few test files.
 
