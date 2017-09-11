@@ -20,3 +20,7 @@ testdoc:
 
 preflight.sh:
 	runs sql to create tables and imports data into the database if desired.
+
+install_daemons.sh:
+	If not run on a server that has apache and postgress downloaded, this should do so.  
+	Outdated with the rest of the project, so it is not called with preflight.sh
